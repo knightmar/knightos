@@ -1,3 +1,6 @@
+use crate::display::display::Color::Black;
+use core::fmt;
+
 const VGA_BUFFER: *mut u8 = 0xb8000 as *mut u8;
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
@@ -10,9 +13,12 @@ pub struct Display {
 
 impl Display {
     pub fn print_chr(&mut self, chr: char, color: u8) {
-        if self.current_position.0 >= BUFFER_WIDTH {
+        if self.current_position.0 >= BUFFER_WIDTH || chr == '\n' {
             self.current_position.0 = 0;
             self.current_position.1 += 1; // Move to the next row
+            if chr == '\n' {
+                return;
+            }
         }
         if self.current_position.1 >= BUFFER_HEIGHT {
             self.current_position.1 = 0; // Wrap to the top
@@ -50,6 +56,13 @@ impl Display {
 
     pub fn set_current_position(&mut self, current_position: (usize, usize)) {
         self.current_position = current_position;
+    }
+}
+
+impl fmt::Write for Display {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.print_str(s, Self::get_color(Black, Color::LightGray));
+        Ok(())
     }
 }
 

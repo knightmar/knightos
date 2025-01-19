@@ -3,22 +3,19 @@
 
 mod display;
 use crate::display::display::{Color, Display};
+use core::fmt::Write;
 use ::core::panic::PanicInfo;
+
 
 static HELLO: &[u8] = b"Hello World!";
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     let mut display = Display::new();
-    let color = Display::get_color(Color::Black, Color::LightGray);
+    let color = Display::get_color(Color::Black, Color::Red);
 
-    HELLO.iter().for_each(|x| {
-        display.print_chr(char::from(x.clone()), color);
-    });
-
-    for _ in (0..1000) {
-        display.print_chr('A', color);
-    }
+    display.write_str("Ceci est un test\n");
+    display.write_str("Banane");
 
     loop {}
 }
