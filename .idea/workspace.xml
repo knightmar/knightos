@@ -30,10 +30,15 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="good base">
-      <change afterPath="$PROJECT_DIR$/src/vga/colors.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/vga/mod.rs" afterDir="false" />
+    <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="start writing vga module">
+      <change afterPath="$PROJECT_DIR$/src/serial/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/boot/boot.s" beforeDir="false" afterPath="$PROJECT_DIR$/src/boot/boot.s" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/vga/colors.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/colors.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/vga/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -218,7 +223,8 @@
       <workItem from="1752503077992" duration="2042000" />
       <workItem from="1752509329211" duration="1508000" />
       <workItem from="1752688717173" duration="879000" />
-      <workItem from="1752689613053" duration="2874000" />
+      <workItem from="1752689613053" duration="13190000" />
+      <workItem from="1752759679111" duration="1317000" />
     </task>
     <task id="LOCAL-00001" summary="good base">
       <option name="closed" value="true" />
@@ -228,7 +234,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752510034347</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="start writing vga module">
+      <option name="closed" value="true" />
+      <created>1752737919839</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1752737919839</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -236,6 +250,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="good base" />
-    <option name="LAST_COMMIT_MESSAGE" value="good base" />
+    <MESSAGE value="start writing vga module" />
+    <option name="LAST_COMMIT_MESSAGE" value="start writing vga module" />
   </component>
 </project>

@@ -24,6 +24,7 @@ stack_top = stack_bottom + 16384
 .type _start, @function
 _start:
 	mov $stack_top, %esp
+
 	call kernel_main
 	cli
 1:	hlt

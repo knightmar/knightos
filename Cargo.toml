@@ -11,6 +11,8 @@ panic = "abort"
 panic = "abort"
 
 [dependencies]
+lazy_static = {version = "1.5.0", features = ["spin_no_std"]}
+spin = "0.10.0"
 
 [[bin]]
 name = "knightos"

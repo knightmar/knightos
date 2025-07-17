@@ -2,31 +2,21 @@
 #![no_main]
 
 use crate::vga::colors::VGAColors::*;
+use crate::vga::VGAText;
 use core::panic::PanicInfo;
 
+mod serial;
 mod vga;
 
 #[allow(clippy::empty_loop)]
-static HELLO: &[u8] = b"Hello World!";
-
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main() -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
+    let mut vga = VGAText::new();
 
-    for i in 0..80 * 25 {
-        unsafe {
-            *vga_buffer.offset((i * 2) as isize) = b' ';
-            *vga_buffer.offset((i * 2 + 1) as isize) = get_colors!(Blue, Black);
-        }
-    }
+    vga.clear_screen();
 
-    for (i, &byte) in HELLO.iter().enumerate() {
-        unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = get_colors!(Blue, White);
-        }
-    }
+    println!("test");
 
     loop {}
 }

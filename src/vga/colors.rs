@@ -1,3 +1,4 @@
+#[repr(usize)]
 pub enum VGAColors {
     Black        = 0x0,
     Blue         = 0x1,
