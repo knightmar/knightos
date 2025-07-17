@@ -1,0 +1,20 @@
+[package]
+name = "knightos"
+version = "0.1.0"
+edition = "2024"
+
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+
+[[bin]]
+name = "knightos"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
