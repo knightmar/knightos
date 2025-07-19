@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[repr(usize)]
 pub enum VGAColors {
     Black        = 0x0,

@@ -31,11 +31,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="start writing vga module">
-      <change afterPath="$PROJECT_DIR$/src/serial/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/boot/boot.s" beforeDir="false" afterPath="$PROJECT_DIR$/src/boot/boot.s" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vga/colors.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/colors.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vga/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/mod.rs" afterDir="false" />
@@ -176,9 +174,9 @@
       <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
-      <option name="INTERPRETER_PATH" value="/usr/bin/fish" />
+      <option name="INTERPRETER_PATH" value="/usr/bin/bash" />
       <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_IN_TERMINAL" value="false" />
       <option name="EXECUTE_SCRIPT_FILE" value="true" />
       <envs />
       <method v="2" />
@@ -197,7 +195,7 @@
       <option name="EXECUTE_SCRIPT_FILE" value="false" />
       <envs />
       <method v="2">
-        <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build" run_configuration_type="ShConfigurationType" />
+        <option name="RunConfigurationTask" enabled="false" run_configuration_name="Build" run_configuration_type="ShConfigurationType" />
       </method>
     </configuration>
     <list>
@@ -225,6 +223,8 @@
       <workItem from="1752688717173" duration="879000" />
       <workItem from="1752689613053" duration="13190000" />
       <workItem from="1752759679111" duration="1317000" />
+      <workItem from="1752848381269" duration="3998000" />
+      <workItem from="1752933207373" duration="8973000" />
     </task>
     <task id="LOCAL-00001" summary="good base">
       <option name="closed" value="true" />
