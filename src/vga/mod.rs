@@ -159,6 +159,10 @@ impl Pointer {
 
     pub fn new_line(&mut self) {
         self.x = 0;
-        self.y += 1;
+        if self.y + 1 >= self.max_y {
+            self.y = 0;
+        } else {
+            self.y += 1;
+        }
     }
 }

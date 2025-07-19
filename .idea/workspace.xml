@@ -30,12 +30,10 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="start writing vga module">
+    <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="Make everything link, compile&#10;Added panic handler, colors, println macros">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/vga/colors.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/colors.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vga/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -224,7 +222,7 @@
       <workItem from="1752689613053" duration="13190000" />
       <workItem from="1752759679111" duration="1317000" />
       <workItem from="1752848381269" duration="3998000" />
-      <workItem from="1752933207373" duration="8973000" />
+      <workItem from="1752933207373" duration="12629000" />
     </task>
     <task id="LOCAL-00001" summary="good base">
       <option name="closed" value="true" />
@@ -242,7 +240,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752737919839</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Make everything link, compile&#10;Added panic handler, colors, println macros">
+      <option name="closed" value="true" />
+      <created>1752945079701</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1752945079701</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -251,6 +257,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="good base" />
     <MESSAGE value="start writing vga module" />
-    <option name="LAST_COMMIT_MESSAGE" value="start writing vga module" />
+    <MESSAGE value="Make everything link, compile&#10;Added panic handler, colors, println macros" />
+    <option name="LAST_COMMIT_MESSAGE" value="Make everything link, compile&#10;Added panic handler, colors, println macros" />
   </component>
 </project>
