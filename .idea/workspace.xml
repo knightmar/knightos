@@ -34,7 +34,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/serial/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/vga/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/vga/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +179,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Run" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="qemu-system-i386 -cdrom knightos.iso" />
+      <option name="SCRIPT_TEXT" value="qemu-system-i386 -cdrom knightos.iso -serial file:serial.log" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -223,6 +222,7 @@
       <workItem from="1752759679111" duration="1317000" />
       <workItem from="1752848381269" duration="3998000" />
       <workItem from="1752933207373" duration="12629000" />
+      <workItem from="1753023592156" duration="3250000" />
     </task>
     <task id="LOCAL-00001" summary="good base">
       <option name="closed" value="true" />

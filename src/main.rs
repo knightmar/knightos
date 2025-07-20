@@ -4,6 +4,7 @@
 use crate::vga::colors::VGAColors::*;
 use core::fmt::{Debug, Pointer};
 use core::panic::PanicInfo;
+use crate::serial::LogLevel::Error;
 
 mod serial;
 mod vga;
@@ -12,17 +13,9 @@ mod vga;
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main() -> ! {
-    let mut i: u64 = 0;
-    loop {
-        println!("You are at {} loops ", i);
-        i += 1;
-        if i == u64::MAX -1 {
-            break;
-        }
-    }
+    println!("Init");
 
-    println!("Done");
-
+    log!("test");
     loop {}
 }
 
