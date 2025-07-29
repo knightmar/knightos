@@ -30,8 +30,12 @@
     </cargoProject>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="Make everything link, compile&#10;Added panic handler, colors, println macros">
+    <list default="true" id="d05e1f8e-bfad-4af8-9d69-6aa2db1fee80" name="Changes" comment="Added logger">
+      <change afterPath="$PROJECT_DIR$/src/descriptors/gdt.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/descriptors/mod.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kernel.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/serial/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/mod.rs" afterDir="false" />
     </list>
@@ -222,7 +226,11 @@
       <workItem from="1752759679111" duration="1317000" />
       <workItem from="1752848381269" duration="3998000" />
       <workItem from="1752933207373" duration="12629000" />
-      <workItem from="1753023592156" duration="3250000" />
+      <workItem from="1753023592156" duration="3863000" />
+      <workItem from="1753122276697" duration="1476000" />
+      <workItem from="1753123774758" duration="6000" />
+      <workItem from="1753723259799" duration="410000" />
+      <workItem from="1753798377731" duration="4617000" />
     </task>
     <task id="LOCAL-00001" summary="good base">
       <option name="closed" value="true" />
@@ -248,7 +256,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752945079701</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added logger">
+      <option name="closed" value="true" />
+      <created>1753027009376</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1753027009376</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -258,6 +274,7 @@
     <MESSAGE value="good base" />
     <MESSAGE value="start writing vga module" />
     <MESSAGE value="Make everything link, compile&#10;Added panic handler, colors, println macros" />
-    <option name="LAST_COMMIT_MESSAGE" value="Make everything link, compile&#10;Added panic handler, colors, println macros" />
+    <MESSAGE value="Added logger" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added logger" />
   </component>
 </project>

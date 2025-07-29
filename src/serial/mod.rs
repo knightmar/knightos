@@ -21,17 +21,19 @@ lazy_static! {
 
 #[macro_export]
 macro_rules! log {
-    ($($arg:tt)*) => {
-        $crate::serial::_log(format_args!("[INFO] {}", $($arg)*));
+    ($log_level:expr, $($arg:tt)*) => {
+        $crate::serial::_log(format_args!(
+            "[{:?}] {}\n",
+            match $log_level {
+                LogLevel::Info => "INFO",
+                LogLevel::Warn => "WARN",
+                LogLevel::Error => "ERROR",
+            },
+            format_args!($($arg)*)
+        ));
     };
-    ($($arg:tt)*, $($log_level:tt)*) => {
-        let str = match $log_level {
-            LogLevel::Info => "[INFO]",
-            LogLevel::Warn => "[WARN]",
-            LogLevel::Error => "[ERROR]",
-        };
-
-        $crate::serial::_log(format_args!("{} {}", str, $($arg)*));
+    ($($arg:tt)*) => {
+        $crate::serial::_log(format_args!("[INFO] {}\n", $($arg)*));
     };
 }
 

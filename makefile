@@ -12,6 +12,7 @@ clear:
 	rm target -Rrf
 
 clean:
+	rm serial.log
 	rm -Rrf build
 	rm -Rrf knightos.iso
 	rm target/x86-unknown-bare_metal/release/deps -Rrf
