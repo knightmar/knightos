@@ -1,6 +1,10 @@
 /build/
+.idea
 
 
 # Added by cargo
 
 /target
+/knightos.iso
+/lib.rmeta
+/serial.log
