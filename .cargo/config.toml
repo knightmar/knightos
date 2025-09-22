@@ -4,4 +4,4 @@ build-std-features = ["compiler-builtins-mem"]
 
 [build]
 target = "x86-unknown-bare_metal.json"
-rustflags = "-C link-arg=-Tsrc/boot/linker.ld --emit=obj"
+rustflags = "-C link-arg=-Tsrc/boot/linker.ld -C link-arg=build/boot.o"

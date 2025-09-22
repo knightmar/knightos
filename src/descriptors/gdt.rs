@@ -65,12 +65,13 @@ impl GdtDescriptor {
             );
 
             asm!(
-                "movw $0x10, %ax
-                movw %ax, %ds
-                movw %ax, %es
-                movw %ax, %fs
-                movw %ax, %gs
-                movw %ax, %ss"
+                "movw $0x10, %ax",
+                "movw %ax, %ds",
+                "movw %ax, %es",
+                "movw %ax, %fs",
+                "movw %ax, %gs",
+                "movw %ax, %ss",
+                options(att_syntax, nostack, preserves_flags),
             );
 
             asm!(
