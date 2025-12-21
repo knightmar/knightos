@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use crate::descriptors::gdt::GdtDescriptor;
+use crate::descriptors::gdt::{post_gdt, GdtDescriptor};
 use crate::serial::LogLevel;
 use crate::serial::LogLevel::Error;
 use crate::vga::colors::VGAColors::*;
@@ -19,6 +19,7 @@ pub extern "C" fn kernel_main() -> ! {
     log!("Testing gdt");
 
     GdtDescriptor::load_gdt();
+    post_gdt();
     loop {}
 }
 
