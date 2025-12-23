@@ -55,12 +55,14 @@ impl GdtDescriptor {
         };
 
         unsafe {
+            // load gdt
             asm!(
             "lgdt ({gdt_ptr})",
             gdt_ptr = in(reg) &descriptor,
             options(att_syntax),
             );
 
+            // reset registers before going protected
             asm!(
                 "movw $0x10, %ax",
                 "movw %ax, %ds",
@@ -71,12 +73,12 @@ impl GdtDescriptor {
                 options(att_syntax, nostack, preserves_flags),
             );
 
+            // far jmp to rst CS
             asm!(
-                "pushl $0x08",
-                "pushl $1f",
-                "lretl",
-                "1:",
-                options(att_syntax, nostack)
+            "ljmp ${code_seg}, ${target}",
+            code_seg = const 0x08u16,
+            target = sym post_gdt,
+            options(att_syntax, nostack, preserves_flags),
             );
         }
     }
@@ -86,9 +88,4 @@ impl GdtDescriptor {
 pub extern "C" fn post_gdt() {
     log!("GDT loaded, segments refreshed.");
     protected_main();
-    loop {
-        unsafe {
-            asm!("hlt");
-        }
-    }
 }

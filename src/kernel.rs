@@ -1,5 +1,7 @@
-use crate::vga::colors::VGAColors::{Red, Yellow};
-use crate::{log, print, println, vga};
+use crate::descriptors::idt::load_idt;
+use crate::descriptors::pic::Pic;
+use crate::serial::Serial;
+use crate::{log, println};
 use core::arch::asm;
 
 pub fn protected_main() {
@@ -18,8 +20,25 @@ pub fn protected_main() {
         );
     }
 
+    // testing
     log!(format_args!("CS : {} DS : {} SS : {}", cs, ds, ss));
     println!("{}", format_args!("CS : {} DS : {} SS : {}", cs, ds, ss));
     println!("test");
-    loop {}
+
+    unsafe { Pic::remap() }
+    unsafe { load_idt() }
+    unsafe {
+        Serial::outb(0x21, 0xFC);
+    }
+    log!("Testing Breakpoint...");
+    unsafe {
+        asm!("int3");
+    }
+
+    log!("Waiting for timer ticks...");
+    loop {
+        unsafe {
+            asm!("hlt");
+        }
+    }
 }

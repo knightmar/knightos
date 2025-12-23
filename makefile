@@ -5,7 +5,7 @@ build:
 
 run: build
 	qemu-system-i386 -cdrom knightos.iso \
-	    -chardev stdio,mux=on,id=char0,logfile=qemu_file.txt,signal=off \
+	    -chardev stdio,mux=on,id=char0,logfile=serial.log,signal=off \
         -mon chardev=char0 \
         -serial chardev:char0 \
 
