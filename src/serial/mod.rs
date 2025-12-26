@@ -23,7 +23,7 @@ lazy_static! {
 macro_rules! log {
     ($log_level:expr, $($arg:tt)*) => {
         $crate::serial::_log(format_args!(
-            "[{:?}] {}\n",
+            "[{}] {}\n",
             match $log_level {
                 LogLevel::Info => "INFO",
                 LogLevel::Warn => "WARN",

@@ -5,21 +5,18 @@ edition = "2024"
 
 
 [profile.dev]
-panic = "abort"
+# panic = "abort"
 
 [profile.release]
-panic = "abort"
+# panic = "abort"
 
 [dependencies]
 lazy_static = {version = "1.5.0", features = ["spin_no_std"]}
 spin = "0.10.0"
 
-
 [[bin]]
 name = "knightos"
 path = "src/main.rs"
-test = false
+test = true
 doctest = false
 bench = false
-
-

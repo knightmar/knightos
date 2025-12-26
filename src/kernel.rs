@@ -35,6 +35,7 @@ pub fn protected_main() {
         asm!("int3");
     }
 
+
     log!("Waiting for timer ticks...");
     loop {
         unsafe {
