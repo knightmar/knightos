@@ -4,14 +4,14 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![allow(dead_code)]
 
 
 
-use crate::descriptors::gdt::{GdtDescriptor, post_gdt};
-use crate::descriptors::idt::load_idt;
-use crate::descriptors::pic::Pic;
+
+use crate::descriptors::gdt::GdtDescriptor;
 use crate::serial::LogLevel::Error;
-use crate::serial::{LogLevel, Serial};
+use crate::serial::LogLevel;
 use crate::vga::colors::VGAColors::*;
 use core::panic::PanicInfo;
 

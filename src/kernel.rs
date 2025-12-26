@@ -11,9 +11,9 @@ pub fn protected_main() {
     let ss: u16;
     unsafe {
         asm!(
-        "mov {0}, cs",
-        "mov {1}, ds",
-        "mov {2}, ds",
+        "mov {0:x}, cs",
+        "mov {1:x}, ds",
+        "mov {2:x}, ds",
         out(reg) cs,
         out(reg) ds,
         out(reg) ss,
@@ -27,14 +27,12 @@ pub fn protected_main() {
 
     unsafe { Pic::remap() }
     unsafe { load_idt() }
-    unsafe {
-        Serial::outb(0x21, 0xFC);
-    }
+    Serial::outb(0x21, 0xFC);
+
     log!("Testing Breakpoint...");
     unsafe {
         asm!("int3");
     }
-
 
     log!("Waiting for timer ticks...");
     loop {

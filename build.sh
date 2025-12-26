@@ -8,7 +8,7 @@ mkdir -p build/isodir/boot/grub
 # otherwise you can remove these two lines.
 i686-elf-as src/boot/boot.s -o ./build/boot.o
 
-cargo +nightly build --release --target x86-unknown-bare_metal.json
+RUSTFLAGS="$RUSTFLAGS -A dead_code" cargo +nightly build --release --target x86-unknown-bare_metal.json
 
 KERNEL_ELF=target/x86-unknown-bare_metal/release/knightos
 

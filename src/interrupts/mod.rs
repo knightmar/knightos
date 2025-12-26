@@ -1,7 +1,7 @@
 mod utils;
 
 use crate::serial::Serial;
-use crate::{log, panic, print};
+use crate::{log, print};
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -18,10 +18,8 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn timer_handler(_frame: InterruptStackFrame) {
-    unsafe {
-        print!(".");
-        Serial::outb(0x20, 0x20);
-    }
+    print!(".");
+    Serial::outb(0x20, 0x20);
 }
 
 pub extern "x86-interrupt" fn double_fault_handler(
@@ -35,21 +33,19 @@ pub extern "x86-interrupt" fn double_fault_handler(
 }
 
 pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
-    unsafe {
-        let scancode = Serial::inb(0x60);
+    let scancode = Serial::inb(0x60);
 
-        let key = utils::translate_keys(scancode);
-        if key != '\0' {
-            log!(format_args!("KEYBOARD: {}", key));
-            print!("{key}");
-        } else {
-            log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
-            if scancode == 0x1 {
-                panic!("Exiting");
-            }
+    let key = utils::translate_keys(scancode);
+    if key != '\0' {
+        log!(format_args!("KEYBOARD: {}", key));
+        print!("{key}");
+    } else {
+        log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
+        if scancode == 0x1 {
+            panic!("Exiting");
         }
-
-        // end of interrupt
-        Serial::outb(0x20, 0x20);
     }
+
+    // end of interrupt
+    Serial::outb(0x20, 0x20);
 }

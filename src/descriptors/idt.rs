@@ -41,17 +41,17 @@ impl IdtEntry {
 }
 
 pub unsafe fn load_idt() {
-    let idt_ptr = IDTDescriptor {
-        size: (size_of::<[IdtEntry; 256]>() - 1) as u16,
-        offset: unsafe { addr_of!(IDT) as u32 },
-    };
-
-    IDT[3].set_handler(breakpoint_handler as u32);
-    IDT[8].set_handler(double_fault_handler as u32);
-    IDT[32].set_handler(timer_handler as u32);
-    IDT[33].set_handler(keyboard_handler as u32);
-
     unsafe {
+        let idt_ptr = IDTDescriptor {
+            size: (size_of::<[IdtEntry; 256]>() - 1) as u16,
+            offset: addr_of!(IDT) as u32,
+        };
+
+        IDT[3].set_handler(breakpoint_handler as *const () as u32);
+        IDT[8].set_handler(double_fault_handler as *const () as u32);
+        IDT[32].set_handler(timer_handler as *const () as u32);
+        IDT[33].set_handler(keyboard_handler as *const () as u32);
+
         // load idt
         asm!(
         "lidt ({idt_ptr})",
