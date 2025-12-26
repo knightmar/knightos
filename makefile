@@ -3,6 +3,8 @@
 build:
 	./build.sh
 
+test: build
+	cargo +nightly test --target x86-unknown-bare_metal.json --bin knightos
 run: build
 	qemu-system-i386 -cdrom knightos.iso \
 	    -chardev stdio,mux=on,id=char0,logfile=serial.log,signal=off \

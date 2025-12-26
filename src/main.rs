@@ -6,30 +6,40 @@
 #![reexport_test_harness_main = "test_main"]
 #![allow(dead_code)]
 
-
-
-
 use crate::descriptors::gdt::GdtDescriptor;
-use crate::serial::LogLevel::Error;
 use crate::serial::LogLevel;
+use crate::serial::LogLevel::Error;
 use crate::vga::colors::VGAColors::*;
+use core::arch::asm;
 use core::panic::PanicInfo;
+use crate::testing::Testable;
 
 mod descriptors;
 mod interrupts;
 mod kernel;
 mod serial;
-mod vga;
 mod testing;
+mod vga;
 
 #[allow(clippy::empty_loop)]
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main() -> ! {
+    log!("Main");
+
     GdtDescriptor::load_gdt();
+    loop {}
+}
+
+pub fn run_test() {
     #[cfg(test)]
     test_main();
-    loop {}
+
+    loop {
+        unsafe {
+            asm!("hlt");
+        }
+    }
 }
 
 #[panic_handler]
@@ -40,18 +50,10 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
-
 #[cfg(test)]
-pub fn test_runner(tests: &[&dyn Fn()]) {
+pub fn test_runner(tests: &[&dyn Testable]) {
     println!("Running {} tests", tests.len());
     for test in tests {
-        test();
+        test.run();
     }
-}
-
-#[test_case]
-fn trivial_assertion() {
-    print!("trivial assertion... ");
-    assert_eq!(1, 1);
-    println!("[ok]");
 }

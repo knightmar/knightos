@@ -1,3 +1,4 @@
+use crate::serial::LogLevel;
 use crate::vga::colors::VGAColors;
 use crate::vga::colors::VGAColors::*;
 use core::fmt;
@@ -17,6 +18,7 @@ macro_rules! get_colors {
 macro_rules! print {
     ($($arg:tt)*) => {
         $crate::vga::_print(format_args!($($arg)*));
+        $crate::log!($crate::serial::LogLevel::Info, $($arg)*);
     };
 }
 

@@ -18,7 +18,6 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn timer_handler(_frame: InterruptStackFrame) {
-    print!(".");
     Serial::outb(0x20, 0x20);
 }
 
@@ -37,8 +36,7 @@ pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
 
     let key = utils::translate_keys(scancode);
     if key != '\0' {
-        log!(format_args!("KEYBOARD: {}", key));
-        print!("{key}");
+        print!("{}", key);
     } else {
         log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
         if scancode == 0x1 {

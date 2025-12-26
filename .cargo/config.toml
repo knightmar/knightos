@@ -5,3 +5,13 @@ build-std-features = ["compiler-builtins-mem"]
 [build]
 target = "x86-unknown-bare_metal.json"
 rustflags = "-C link-arg=-Tsrc/boot/linker.ld -C link-arg=build/boot.o"
+
+
+[target.'cfg(target_os = "none")']
+runner = [
+    "qemu-system-i386",
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", # Enables QEMU exit from code
+    "-serial", "stdio",                                  # Redirects log! to console
+    "-display", "none",                                  # Headless mode for tests
+    "-kernel"                                            # Cargo appends the binary path here
+]

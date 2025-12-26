@@ -7,9 +7,8 @@ use spin::Mutex;
 pub enum LogLevel {
     Info,
     Warn,
-    Error
+    Error,
 }
-
 
 pub struct Serial {
     port: u16,
@@ -21,22 +20,65 @@ lazy_static! {
 
 #[macro_export]
 macro_rules! log {
-    ($log_level:expr, $($arg:tt)*) => {
+    // --------------------------------------------------------
+    // Case 1: Explicit Level + String Literal + Arbitrary Args
+    // This matches what println! sends: ("{}\n", format_args!(...))
+    // --------------------------------------------------------
+    ($log_level:expr, $fmt:literal, $($args:tt)*) => {
         $crate::serial::_log(format_args!(
             "[{}] {}\n",
             match $log_level {
-                LogLevel::Info => "INFO",
-                LogLevel::Warn => "WARN",
-                LogLevel::Error => "ERROR",
+                $crate::serial::LogLevel::Info => "INFO",
+                $crate::serial::LogLevel::Warn => "WARN",
+                $crate::serial::LogLevel::Error => "ERROR",
             },
-            format_args!($($arg)*)
+            format_args!($fmt, $($args)*)
         ));
     };
-    ($($arg:tt)*) => {
-        $crate::serial::_log(format_args!("[INFO] {}\n", $($arg)*));
+
+    // --------------------------------------------------------
+    // Case 2: Explicit Level + String Literal (No args)
+    // --------------------------------------------------------
+    ($log_level:expr, $fmt:literal) => {
+        $crate::serial::_log(format_args!(
+            "[{}] {}\n",
+            match $log_level {
+                $crate::serial::LogLevel::Info => "INFO",
+                $crate::serial::LogLevel::Warn => "WARN",
+                $crate::serial::LogLevel::Error => "ERROR",
+            },
+            $fmt
+        ));
+    };
+
+    // --------------------------------------------------------
+    // Case 3: Explicit Level + Expression (e.g. manual format_args!)
+    // --------------------------------------------------------
+    ($log_level:expr, $e:expr) => {
+        $crate::serial::_log(format_args!(
+            "[{}] {}\n",
+            match $log_level {
+                $crate::serial::LogLevel::Info => "INFO",
+                $crate::serial::LogLevel::Warn => "WARN",
+                $crate::serial::LogLevel::Error => "ERROR",
+            },
+            $e
+        ));
+    };
+
+    // --------------------------------------------------------
+    // Defaults (Info level)
+    // --------------------------------------------------------
+    ($fmt:literal, $($args:tt)*) => {
+        $crate::log!($crate::serial::LogLevel::Info, $fmt, $($args)*);
+    };
+    ($fmt:literal) => {
+        $crate::log!($crate::serial::LogLevel::Info, $fmt);
+    };
+    ($e:expr) => {
+        $crate::log!($crate::serial::LogLevel::Info, $e);
     };
 }
-
 pub fn _log(args: fmt::Arguments) {
     use core::fmt::Write;
     let _ = LOGGER.lock().write_fmt(args);
