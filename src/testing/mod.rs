@@ -1,5 +1,4 @@
 use core::arch::asm;
-use crate::{log, println};
 
 pub trait Testable {
     fn run(&self);

@@ -3,7 +3,7 @@
 build:
 	./build.sh
 
-test: build
+test:
 	cargo +nightly test --target x86-unknown-bare_metal.json --bin knightos
 run: build
 	qemu-system-i386 -cdrom knightos.iso \
@@ -12,12 +12,11 @@ run: build
         -serial chardev:char0 \
 
 clear:
-	rm -Rrf build
-	rm -Rrf knightos.iso
-	rm target -Rrf
+	rm -Rrf build || true
+	rm -Rrf knightos.iso || true
 
 clean:
-	rm serial.log
-	rm -Rrf build
-	rm -Rrf knightos.iso
-	rm target/x86-unknown-bare_metal/release/deps -Rrf
+	rm serial.log || true
+	rm -Rrf build || true
+	rm -Rrf knightos.iso || true
+	rm target/x86-unknown-bare_metal/release/deps -Rrf || true

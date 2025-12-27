@@ -1,7 +1,7 @@
 #!/bin/bash
 export PATH=$PATH:/home/knightmar/opt/cross/bin/
 
-make clean
+make clear
 mkdir -p build/isodir/boot/grub
 
 i686-elf-as src/boot/boot.s -o ./build/boot.o

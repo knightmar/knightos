@@ -27,7 +27,8 @@ pub fn protected_main() {
 
     unsafe { Pic::remap() }
     unsafe { load_idt() }
-    Serial::outb(0x21, 0xFC);
+    Serial::outb(0x21, 0xFC); // activate interrupts
+    // unsafe { core::arch::asm!("ud2") };
 
     run_test();
 }

@@ -9,14 +9,15 @@
 use crate::descriptors::gdt::GdtDescriptor;
 use crate::serial::LogLevel;
 use crate::serial::LogLevel::Error;
+use crate::testing::Testable;
 use crate::vga::colors::VGAColors::*;
 use core::arch::asm;
 use core::panic::PanicInfo;
-use crate::testing::Testable;
 
 mod descriptors;
 mod interrupts;
 mod kernel;
+mod paging;
 mod serial;
 mod testing;
 mod vga;
@@ -47,7 +48,11 @@ fn panic(info: &PanicInfo) -> ! {
     vga::WRITER.lock().change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
     println!("\n{}", info);
-    loop {}
+    loop {
+        unsafe {
+            asm!("hlt");
+        }
+    }
 }
 
 #[cfg(test)]
