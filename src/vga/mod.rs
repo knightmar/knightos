@@ -22,6 +22,10 @@ macro_rules! print {
     };
 }
 
+pub unsafe fn force_unlock() {
+    WRITER.force_unlock();
+}
+
 #[macro_export]
 macro_rules! println {
     () => {

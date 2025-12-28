@@ -3,8 +3,10 @@ mod utils;
 use crate::interrupts::utils::hlt_loop;
 use crate::serial::LogLevel::Error;
 use crate::serial::Serial;
-use crate::{log, print, println};
+use crate::vga::force_unlock;
+use crate::{log, print, println, vga};
 use core::arch::asm;
+use crate::vga::colors::VGAColors::Red;
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -55,9 +57,15 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     let accessed_address: usize;
     unsafe { asm!("mov {}, cr2", out(reg) accessed_address) };
 
-    log!(Error, "EXCEPTION: PAGE FAULT");
-    log!(Error, "Accessed Address: {:#x}", accessed_address);
-    log!(Error, "Error Code: {:#b}", error_code);
+    unsafe {
+        force_unlock();
+    }
 
+
+    vga::WRITER.lock().change_fg_color(Red);
+
+    println!("EXCEPTION: PAGE FAULT");
+    println!("Accessed Address: {:#x}", accessed_address);
+    println!("Error Code: {:#b}", error_code);
     panic!("Page error occurred, check logs for more infos");
 }
