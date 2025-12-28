@@ -1,3 +1,5 @@
+use core::arch::asm;
+
 pub fn translate_keys(scan_code: u8) -> char {
     match scan_code {
         0x02 => '1',
@@ -38,5 +40,11 @@ pub fn translate_keys(scan_code: u8) -> char {
         0x31 => 'n',
         0x39 => ' ',
         _ => '\0',
+    }
+}
+
+pub fn hlt_loop() {
+    loop {
+        unsafe { asm!("hlt") }
     }
 }

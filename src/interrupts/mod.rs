@@ -1,7 +1,10 @@
 mod utils;
 
+use crate::interrupts::utils::hlt_loop;
+use crate::serial::LogLevel::Error;
 use crate::serial::Serial;
-use crate::{log, print};
+use crate::{log, print, println};
+use core::arch::asm;
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -46,4 +49,15 @@ pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
 
     // end of interrupt
     Serial::outb(0x20, 0x20);
+}
+
+pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, error_code: u32) {
+    let accessed_address: usize;
+    unsafe { asm!("mov {}, cr2", out(reg) accessed_address) };
+
+    log!(Error, "EXCEPTION: PAGE FAULT");
+    log!(Error, "Accessed Address: {:#x}", accessed_address);
+    log!(Error, "Error Code: {:#b}", error_code);
+
+    panic!("Page error occurred, check logs for more infos");
 }

@@ -51,6 +51,7 @@ pub unsafe fn load_idt() {
         IDT[8].set_handler(double_fault_handler as *const () as u32);
         IDT[32].set_handler(timer_handler as *const () as u32);
         IDT[33].set_handler(keyboard_handler as *const () as u32);
+        IDT[14].set_handler(page_fault_handler as *const () as u32);
 
         // load idt
         asm!(
