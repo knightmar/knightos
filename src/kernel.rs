@@ -4,7 +4,7 @@ use crate::descriptors::pic::Pic;
 use crate::paging::init_paging;
 use crate::serial::LogLevel::Info;
 use crate::serial::Serial;
-use crate::{log, println, run_test};
+use crate::{log, println, print, run_test};
 use core::arch::asm;
 
 pub fn protected_main() {
@@ -31,15 +31,6 @@ pub fn protected_main() {
     unsafe { load_idt() }
     Serial::outb(0x21, 0xFC); // activate interrupts
     init_paging();
-
-    println!("test");
-
-    unsafe {
-        let ptr = 0xdeadbeef as *mut u8;
-        println!("{}", *ptr);
-        *ptr = 42;
-        println!("{}", *ptr);
-    }
-
+    print!("");
     run_test();
 }

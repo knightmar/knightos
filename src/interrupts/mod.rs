@@ -42,6 +42,8 @@ pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
     let key = utils::translate_keys(scancode);
     if key != '\0' {
         print!("{}", key);
+    } else if scancode == 0x4b {
+        vga::WRITER.lock().pointer.move_prev_pos();
     } else {
         log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
         if scancode == 0x1 {
