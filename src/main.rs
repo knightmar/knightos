@@ -13,6 +13,7 @@ use crate::backend::vga::colors::VGAColors::Red;
 use crate::testing::Testable;
 use core::arch::asm;
 use core::panic::PanicInfo;
+use crate::user_interface::text_user_interface::TUI;
 
 mod backend;
 mod kernel;
@@ -45,7 +46,7 @@ pub fn run_test() {
 fn panic(info: &PanicInfo) -> ! {
     vga::force_unlock();
 
-    vga::WRITER.lock().change_fg_color(Red);
+    TUI.lock().vga_text.change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
     println!("\n{}", info);
     loop {
@@ -58,7 +59,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    vga::WRITER.lock().change_fg_color(Red);
+    TUI.lock().vga_text.change_fg_color(Red);
     println!("\n[failed]\n{}", info);
     loop {
         unsafe {

@@ -1,30 +1,25 @@
 use crate::backend::vga::colors::VGAColors;
 use crate::backend::vga::colors::VGAColors::*;
 use crate::get_colors;
+use crate::user_interface::text_user_interface::TUI;
 use core::fmt;
 use core::fmt::Write;
-use lazy_static::lazy_static;
-use spin::Mutex;
 
 pub(crate) mod colors;
 mod macros;
 
 pub fn force_unlock() {
     unsafe {
-        WRITER.force_unlock();
+        TUI.force_unlock();
     }
 }
 
 unsafe impl Send for VGAText {}
 unsafe impl Sync for VGAText {}
 
-lazy_static! {
-    pub static ref WRITER: Mutex<VGAText> = Mutex::new(VGAText::new());
-}
-
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    let _ = WRITER.lock().write_fmt(args);
+    let _ = TUI.lock().vga_text.write_fmt(args);
 }
 
 pub struct Pointer {
@@ -32,6 +27,7 @@ pub struct Pointer {
     y: u32,
     max_x: u32,
     max_y: u32,
+    color: VGAColors,
 }
 
 pub struct VGAText {
@@ -105,6 +101,15 @@ impl VGAText {
             ) = self.color;
         }
         self.pointer.move_next_pos();
+        self.change_color_current_ptr(Red);
+    }
+
+    pub fn change_color_current_ptr(&mut self, color: VGAColors) {
+        unsafe {
+            *self.buffer.offset(
+                ((self.pointer.max_x * self.pointer.y + self.pointer.x) * 2 + 1) as isize,
+            ) = get_colors!(White, color);
+        }
     }
 }
 
@@ -122,6 +127,7 @@ impl Pointer {
             y: 0,
             max_x: 80,
             max_y: 25,
+            color: Red,
         }
     }
 

@@ -5,6 +5,7 @@ use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{serial, vga};
 use crate::{log, print, println};
 use core::arch::asm;
+use crate::user_interface::text_user_interface::TUI;
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -21,6 +22,9 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn timer_handler(_frame: InterruptStackFrame) {
+    if let Some(mut tui) = crate::user_interface::text_user_interface::TUI.try_lock() {
+        tui.on_keyboard_nav();
+    }
     Serial::outb(0x20, 0x20);
 }
 
@@ -40,9 +44,23 @@ pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
     let key = utils::translate_keys(scancode);
     if key != '\0' {
         print!("{}", key);
-    } else if scancode == 0x4b {
-        vga::WRITER.lock().pointer.move_prev_pos();
     } else {
+        let mut tui = crate::user_interface::text_user_interface::TUI.lock();
+
+        match scancode {
+            // Press events
+            0x48 => tui.keyboard_nav_event.up = true,
+            0x50 => tui.keyboard_nav_event.down = true,
+            0x4B => tui.keyboard_nav_event.left = true,
+            0x4D => tui.keyboard_nav_event.right = true,
+            // Release events (scancode + 0x80)
+            0xC8 => tui.keyboard_nav_event.up = false,
+            0xD0 => tui.keyboard_nav_event.down = false,
+            0xCB => tui.keyboard_nav_event.left = false,
+            0xCD => tui.keyboard_nav_event.right = false,
+            _ => {}
+        }
+
         log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
         if scancode == 0x1 {
             panic!("Exiting");
@@ -60,7 +78,7 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     vga::force_unlock();
     serial::force_unlock();
 
-    vga::WRITER.lock().change_fg_color(Red);
+    TUI.lock().vga_text.change_fg_color(Red);
 
     println!("EXCEPTION: PAGE FAULT");
     println!("Accessed Address: {:#x}", accessed_address);
