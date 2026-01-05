@@ -1,10 +1,10 @@
 use crate::backend::vga::colors::VGAColors;
 use crate::backend::vga::colors::VGAColors::*;
+use crate::get_colors;
 use core::fmt;
 use core::fmt::Write;
 use lazy_static::lazy_static;
 use spin::Mutex;
-use crate::get_colors;
 
 pub(crate) mod colors;
 mod macros;

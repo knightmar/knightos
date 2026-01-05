@@ -1,6 +1,4 @@
 use core::arch::asm;
-use crate::log;
-use crate::backend::serial::LogLevel::Info;
 
 pub trait Testable {
     fn run(&self);

@@ -1,10 +1,10 @@
 mod utils;
 
-use crate::backend::vga::colors::VGAColors::Red;
-use core::arch::asm;
-use crate::backend::{serial, vga};
 use crate::backend::serial::Serial;
+use crate::backend::vga::colors::VGAColors::Red;
+use crate::backend::{serial, vga};
 use crate::{log, print, println};
+use core::arch::asm;
 
 #[repr(C)]
 pub struct InterruptStackFrame {

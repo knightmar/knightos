@@ -6,17 +6,17 @@
 #![reexport_test_harness_main = "test_main"]
 #![allow(dead_code)]
 
-use core::arch::asm;
-use core::panic::PanicInfo;
 use crate::backend::descriptors::gdt::GdtDescriptor;
 use crate::backend::serial::LogLevel::Error;
 use crate::backend::vga;
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::testing::Testable;
+use core::arch::asm;
+use core::panic::PanicInfo;
 
+mod backend;
 mod kernel;
 mod testing;
-mod backend;
 mod user_interface;
 
 #[allow(clippy::empty_loop)]
@@ -54,7 +54,6 @@ fn panic(info: &PanicInfo) -> ! {
         }
     }
 }
-
 
 #[cfg(test)]
 #[panic_handler]
