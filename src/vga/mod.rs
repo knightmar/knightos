@@ -49,7 +49,7 @@ pub fn _print(args: fmt::Arguments) {
     let _ = WRITER.lock().write_fmt(args);
 }
 
-struct Pointer {
+pub struct Pointer {
     x: u32,
     y: u32,
     max_x: u32,
@@ -57,7 +57,7 @@ struct Pointer {
 }
 
 pub struct VGAText {
-    pointer: Pointer,
+    pub pointer: Pointer,
     color: u8,
     buffer: *mut u8,
 }
@@ -161,6 +161,20 @@ impl Pointer {
             }
         } else {
             self.x += 1;
+        }
+    }
+
+    pub fn move_prev_pos(&mut self) {
+        if self.x > 0 {
+            self.x -= 1;
+        } else {
+            if self.y > 0 {
+                self.y -= 1;
+                self.x = self.max_x;
+            } else {
+                self.y = 0;
+                self.x = 0;
+            }
         }
     }
 
