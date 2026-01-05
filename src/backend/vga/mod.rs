@@ -100,7 +100,7 @@ impl VGAText {
                 ((self.pointer.max_x * self.pointer.y + self.pointer.x) * 2 + 1) as isize,
             ) = self.color;
         }
-        self.pointer.move_next_pos();
+        self.pointer.move_right();
         self.change_color_current_ptr(Red);
     }
 
@@ -135,7 +135,7 @@ impl Pointer {
         self.x = 0;
         self.y = 0;
     }
-    pub fn move_next_pos(&mut self) {
+    pub fn move_right(&mut self) {
         if self.x + 1 >= self.max_x {
             self.x = 0;
             if self.y + 1 >= self.max_y {
@@ -148,7 +148,7 @@ impl Pointer {
         }
     }
 
-    pub fn move_prev_pos(&mut self) {
+    pub fn move_left(&mut self) {
         if self.x > 0 {
             self.x -= 1;
         } else {
@@ -159,6 +159,18 @@ impl Pointer {
                 self.y = 0;
                 self.x = 0;
             }
+        }
+    }
+
+    pub fn move_up(&mut self) {
+        if self.y > 0 {
+            self.y -= 1;
+        }
+    }
+
+    pub fn move_down(&mut self) {
+        if self.y + 1 <= self.max_y {
+            self.y += 1;
         }
     }
 

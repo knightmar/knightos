@@ -3,9 +3,15 @@ mod utils;
 use crate::backend::serial::Serial;
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{serial, vga};
+use crate::user_interface::text_user_interface::TUI;
 use crate::{log, print, println};
 use core::arch::asm;
-use crate::user_interface::text_user_interface::TUI;
+use lazy_static::lazy_static;
+use spin::Mutex;
+
+lazy_static! {
+    pub static ref TICK_COUNT: Mutex<u64> = Mutex::new(0);
+}
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -22,9 +28,14 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn timer_handler(_frame: InterruptStackFrame) {
+    if let Some(mut count) = TICK_COUNT.try_lock() {
+        *count += 1;
+    }
+
     if let Some(mut tui) = crate::user_interface::text_user_interface::TUI.try_lock() {
         tui.on_keyboard_nav();
     }
+
     Serial::outb(0x20, 0x20);
 }
 
@@ -58,6 +69,10 @@ pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
             0xD0 => tui.keyboard_nav_event.down = false,
             0xCB => tui.keyboard_nav_event.left = false,
             0xCD => tui.keyboard_nav_event.right = false,
+            0x52 => {
+                let count = TICK_COUNT.lock();
+                println!("{}", count);
+            }
             _ => {}
         }
 

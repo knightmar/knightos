@@ -53,8 +53,10 @@ impl TextUserInterface {
             self.vga_text.change_color_current_ptr(Black);
 
             match &self.keyboard_nav_event {
-                a if a.left => self.vga_text.pointer.move_prev_pos(),
-                a if a.right => self.vga_text.pointer.move_next_pos(),
+                a if a.left => self.vga_text.pointer.move_left(),
+                a if a.right => self.vga_text.pointer.move_right(),
+                a if a.up => self.vga_text.pointer.move_up(),
+                a if a.down => self.vga_text.pointer.move_down(),
                 _ => {}
             }
             self.vga_text.change_color_current_ptr(Red);
