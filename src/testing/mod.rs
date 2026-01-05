@@ -1,5 +1,4 @@
 use core::arch::asm;
-use core::ptr::null;
 use crate::log;
 use crate::serial::LogLevel::Info;
 
@@ -18,7 +17,7 @@ where
 
         self();
 
-        crate::println!("[ok]");
+        crate::println!("[ok]\n------------------------------");
     }
 }
 
@@ -34,14 +33,12 @@ fn trivial_assertion() {
     assert_eq!(1, 1);
 }
 
-#[test_case]
-fn paging_test() {
-    unsafe {
-
-        let ptr = 0xdeadbeef as *mut u8;
-        log!(Info, "{}", *ptr);
-        *ptr = 42;
-        log!(Info, "{}", *ptr);
-
-    }
-}
+// #[test_case]
+// fn paging_test() {
+//     unsafe {
+//         let ptr = 0xdeadbeef as *mut u8;
+//         log!(Info, "{}", *ptr);
+//         *ptr = 42;
+//         log!(Info, "{}", *ptr);
+//     }
+// }

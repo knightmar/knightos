@@ -1,12 +1,9 @@
 mod utils;
 
-use crate::interrupts::utils::hlt_loop;
-use crate::serial::LogLevel::Error;
 use crate::serial::Serial;
-use crate::vga::force_unlock;
-use crate::{log, print, println, vga};
-use core::arch::asm;
 use crate::vga::colors::VGAColors::Red;
+use crate::{log, print, println, serial, vga};
+use core::arch::asm;
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -57,10 +54,8 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     let accessed_address: usize;
     unsafe { asm!("mov {}, cr2", out(reg) accessed_address) };
 
-    unsafe {
-        force_unlock();
-    }
-
+    vga::force_unlock();
+    serial::force_unlock();
 
     vga::WRITER.lock().change_fg_color(Red);
 

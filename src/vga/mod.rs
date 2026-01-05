@@ -1,4 +1,3 @@
-use crate::serial::LogLevel;
 use crate::vga::colors::VGAColors;
 use crate::vga::colors::VGAColors::*;
 use core::fmt;
@@ -22,8 +21,10 @@ macro_rules! print {
     };
 }
 
-pub unsafe fn force_unlock() {
-    WRITER.force_unlock();
+pub fn force_unlock() {
+    unsafe {
+        WRITER.force_unlock();
+    }
 }
 
 #[macro_export]

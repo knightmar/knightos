@@ -3,6 +3,7 @@ use core::fmt;
 use core::fmt::Write;
 use lazy_static::lazy_static;
 use spin::Mutex;
+use crate::vga::WRITER;
 
 pub enum LogLevel {
     Info,
@@ -82,6 +83,12 @@ macro_rules! log {
 pub fn _log(args: fmt::Arguments) {
     use core::fmt::Write;
     let _ = LOGGER.lock().write_fmt(args);
+}
+
+pub fn force_unlock() {
+    unsafe {
+        LOGGER.force_unlock();
+    }
 }
 
 impl Serial {

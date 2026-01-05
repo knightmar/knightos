@@ -7,12 +7,11 @@
 #![allow(dead_code)]
 
 use crate::descriptors::gdt::GdtDescriptor;
-use crate::serial::LogLevel;
-use crate::serial::LogLevel::Error;
-use crate::testing::Testable;
 use crate::vga::colors::VGAColors::*;
 use core::arch::asm;
 use core::panic::PanicInfo;
+use crate::serial::LogLevel::Error;
+use crate::testing::Testable;
 
 mod descriptors;
 mod interrupts;
@@ -43,11 +42,26 @@ pub fn run_test() {
     }
 }
 
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     vga::WRITER.lock().change_fg_color(Red);
+    vga::WRITER.force_unlock();
     log!(Error, "Erreur critique : {}", info);
     println!("\n{}", info);
+    loop {
+        unsafe {
+            asm!("hlt");
+        }
+    }
+}
+
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    vga::WRITER.lock().change_fg_color(Red);
+    println!("\n[failed]\n{}", info);
     loop {
         unsafe {
             asm!("hlt");
@@ -61,4 +75,5 @@ pub fn test_runner(tests: &[&dyn Testable]) {
     for test in tests {
         test.run();
     }
+    println!("Done all tests, all succeded !");
 }
