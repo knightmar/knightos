@@ -1,4 +1,4 @@
-use crate::serial::Serial;
+use crate::backend::serial::Serial;
 
 pub struct Pic;
 

@@ -1,7 +1,7 @@
-use crate::descriptors::idt::load_idt;
-use crate::descriptors::pic::Pic;
-use crate::paging::init_paging;
-use crate::serial::Serial;
+use crate::backend::descriptors::idt::load_idt;
+use crate::backend::descriptors::pic::Pic;
+use crate::backend::paging::init_paging;
+use crate::backend::serial::Serial;
 use crate::{println, run_test};
 
 pub fn protected_main() {

@@ -6,20 +6,18 @@
 #![reexport_test_harness_main = "test_main"]
 #![allow(dead_code)]
 
-use crate::descriptors::gdt::GdtDescriptor;
-use crate::vga::colors::VGAColors::*;
 use core::arch::asm;
 use core::panic::PanicInfo;
-use crate::serial::LogLevel::Error;
+use crate::backend::descriptors::gdt::GdtDescriptor;
+use crate::backend::serial::LogLevel::Error;
+use crate::backend::vga;
+use crate::backend::vga::colors::VGAColors::Red;
 use crate::testing::Testable;
 
-mod descriptors;
-mod interrupts;
 mod kernel;
-mod paging;
-mod serial;
 mod testing;
-mod vga;
+mod backend;
+mod user_interface;
 
 #[allow(clippy::empty_loop)]
 #[cfg_attr(test, allow(dead_code))]
@@ -45,8 +43,9 @@ pub fn run_test() {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+    vga::force_unlock();
+
     vga::WRITER.lock().change_fg_color(Red);
-    vga::WRITER.force_unlock();
     log!(Error, "Erreur critique : {}", info);
     println!("\n{}", info);
     loop {

@@ -1,40 +1,18 @@
-use crate::vga::colors::VGAColors;
-use crate::vga::colors::VGAColors::*;
+use crate::backend::vga::colors::VGAColors;
+use crate::backend::vga::colors::VGAColors::*;
 use core::fmt;
 use core::fmt::Write;
 use lazy_static::lazy_static;
 use spin::Mutex;
+use crate::get_colors;
 
 pub(crate) mod colors;
-#[macro_export]
-macro_rules! get_colors {
-    ($foreground:expr, $background:expr) => {
-        ($background as u8) << 4 | (($foreground as u8) & 0b01111111)
-    };
-}
-
-#[macro_export]
-macro_rules! print {
-    ($($arg:tt)*) => {
-        $crate::vga::_print(format_args!($($arg)*));
-        $crate::log!($crate::serial::LogLevel::Info, $($arg)*);
-    };
-}
+mod macros;
 
 pub fn force_unlock() {
     unsafe {
         WRITER.force_unlock();
     }
-}
-
-#[macro_export]
-macro_rules! println {
-    () => {
-        $crate::print!("\n")
-    };
-    ($($arg:tt)*) => {
-        $crate::print!("{}\n", format_args!($($arg)*));
-    };
 }
 
 unsafe impl Send for VGAText {}

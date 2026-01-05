@@ -1,4 +1,4 @@
-use crate::interrupts::*;
+use crate::backend::interrupts::*;
 use core::arch::asm;
 use core::ptr::addr_of;
 
