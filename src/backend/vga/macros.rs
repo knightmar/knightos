@@ -7,18 +7,50 @@ macro_rules! get_colors {
 
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => {
-        $crate::backend::vga::_print(format_args!($($arg)*));
-        $crate::log!($crate::backend::serial::LogLevel::Info, $($arg)*);
+    (@global $fmt:expr, $($arg:tt)*) => {
+        $crate::backend::vga::_print(format_args!($fmt, $($arg)*));
+        $crate::log!($crate::backend::serial::LogLevel::Info, format_args!($fmt, $($arg)*));
+    };
+    (@vga $vga:expr, $fmt:expr, $($arg:tt)*) => {{
+        use core::fmt::Write;
+        let _ = write!($vga, $fmt, $($arg)*);
+    }};
+
+    ($fmt:literal, $($arg:tt)+) => {
+        $crate::print!(@global $fmt, $($arg)+)
+    };
+    ($fmt:literal) => {
+        $crate::print!(@global $fmt,)
+    };
+    ($vga:expr, $fmt:literal, $($arg:tt)*) => {
+        $crate::print!(@vga $vga, $fmt, $($arg)*)
+    };
+    ($fmt:expr) => {
+        $crate::print!(@global "{}", $fmt)
     };
 }
 
 #[macro_export]
 macro_rules! println {
     () => {
-        $crate::print!("\n")
+        $crate::print!(@global "\n",)
     };
-    ($($arg:tt)*) => {
-        $crate::print!("{}\n", format_args!($($arg)*));
+    ($fmt:literal, $($arg:tt)+) => {
+        $crate::print!(@global concat!($fmt, "\n"), $($arg)+)
+    };
+    ($fmt:literal) => {
+        $crate::print!(@global concat!($fmt, "\n"),)
+    };
+    ($vga:expr, $fmt:literal, $($arg:tt)+) => {
+        $crate::print!(@vga $vga, concat!($fmt, "\n"), $($arg)+)
+    };
+    ($vga:expr, $fmt:literal) => {
+        $crate::print!(@vga $vga, concat!($fmt, "\n"),)
+    };
+    ($vga:expr) => {
+        $crate::print!(@vga $vga, "\n",)
+    };
+    ($fmt:expr) => {
+        $crate::print!(@global "{}\n", $fmt)
     };
 }

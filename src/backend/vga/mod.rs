@@ -1,7 +1,8 @@
+use crate::backend::serial::LogLevel::Error;
 use crate::backend::vga::colors::VGAColors;
 use crate::backend::vga::colors::VGAColors::*;
-use crate::get_colors;
 use crate::user_interface::text_user_interface::TUI;
+use crate::{get_colors, log};
 use core::fmt;
 use core::fmt::Write;
 
@@ -19,7 +20,11 @@ unsafe impl Sync for VGAText {}
 
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    let _ = TUI.lock().vga_text.write_fmt(args);
+    if let Some(mut guard) = TUI.try_lock() {
+        let _ = guard.vga_text.write_fmt(args);
+    } else {
+        log!(Error, "Unable to lock TUI when printing");
+    }
 }
 
 pub struct Pointer {
@@ -76,6 +81,7 @@ impl VGAText {
         }
         self.set_color(old_color);
         self.pointer.reset_pos();
+        self.change_color_current_ptr(self.pointer.color);
     }
 
     pub fn write_str(&mut self, str: &str) {
@@ -83,7 +89,9 @@ impl VGAText {
             if chr.is_ascii_alphanumeric() || !chr.is_ascii_control() || b' '.eq(chr) {
                 self.write_chr(char::from(*chr));
             } else if b'\n'.eq(chr) {
+                self.change_color_current_ptr(Black);
                 self.pointer.new_line();
+                self.change_color_current_ptr(self.pointer.color);
             } else {
                 self.write_chr('�');
             }
@@ -110,6 +118,21 @@ impl VGAText {
                 ((self.pointer.max_x * self.pointer.y + self.pointer.x) * 2 + 1) as isize,
             ) = get_colors!(White, color);
         }
+    }
+
+    pub fn delete_char(&mut self) {
+        self.change_color_current_ptr(Black);
+        self.pointer.move_left();
+        unsafe {
+            *self
+                .buffer
+                .offset(((self.pointer.max_x * self.pointer.y + self.pointer.x) * 2) as isize) =
+                b' ';
+            *self.buffer.offset(
+                ((self.pointer.max_x * self.pointer.y + self.pointer.x) * 2 + 1) as isize,
+            ) = self.color;
+        }
+        self.change_color_current_ptr(Red);
     }
 }
 
@@ -181,5 +204,45 @@ impl Pointer {
         } else {
             self.y += 1;
         }
+    }
+
+    pub fn x(&self) -> u32 {
+        self.x
+    }
+
+    pub fn y(&self) -> u32 {
+        self.y
+    }
+
+    pub fn max_x(&self) -> u32 {
+        self.max_x
+    }
+
+    pub fn max_y(&self) -> u32 {
+        self.max_y
+    }
+
+    pub fn color(&self) -> VGAColors {
+        self.color
+    }
+
+    pub fn set_x(&mut self, x: u32) {
+        self.x = x;
+    }
+
+    pub fn set_y(&mut self, y: u32) {
+        self.y = y;
+    }
+
+    pub fn set_max_x(&mut self, max_x: u32) {
+        self.max_x = max_x;
+    }
+
+    pub fn set_max_y(&mut self, max_y: u32) {
+        self.max_y = max_y;
+    }
+
+    pub fn set_color(&mut self, color: VGAColors) {
+        self.color = color;
     }
 }

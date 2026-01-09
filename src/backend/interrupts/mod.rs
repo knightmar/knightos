@@ -4,7 +4,7 @@ use crate::backend::serial::Serial;
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{serial, vga};
 use crate::user_interface::text_user_interface::TUI;
-use crate::{log, print, println};
+use crate::{log, println};
 use core::arch::asm;
 use lazy_static::lazy_static;
 use spin::Mutex;
@@ -52,36 +52,9 @@ pub extern "x86-interrupt" fn double_fault_handler(
 pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
     let scancode = Serial::inb(0x60);
 
-    let key = utils::translate_keys(scancode);
-    if key != '\0' {
-        print!("{}", key);
-    } else {
-        let mut tui = crate::user_interface::text_user_interface::TUI.lock();
+    let mut tui = crate::user_interface::text_user_interface::TUI.lock();
 
-        match scancode {
-            // Press events
-            0x48 => tui.keyboard_nav_event.up = true,
-            0x50 => tui.keyboard_nav_event.down = true,
-            0x4B => tui.keyboard_nav_event.left = true,
-            0x4D => tui.keyboard_nav_event.right = true,
-            // Release events (scancode + 0x80)
-            0xC8 => tui.keyboard_nav_event.up = false,
-            0xD0 => tui.keyboard_nav_event.down = false,
-            0xCB => tui.keyboard_nav_event.left = false,
-            0xCD => tui.keyboard_nav_event.right = false,
-            0x52 => {
-                let count = TICK_COUNT.lock();
-                println!("{}", count);
-            }
-            _ => {}
-        }
-
-        log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
-        if scancode == 0x1 {
-            panic!("Exiting");
-        }
-    }
-
+    tui.on_keyboard_event(scancode);
     // end of interrupt
     Serial::outb(0x20, 0x20);
 }

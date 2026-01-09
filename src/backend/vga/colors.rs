@@ -1,4 +1,5 @@
 #[allow(dead_code)]
+#[derive(Copy, Clone)]
 #[repr(usize)]
 pub enum VGAColors {
     Black = 0x0,
