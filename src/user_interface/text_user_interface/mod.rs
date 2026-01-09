@@ -44,7 +44,7 @@ impl TextUserInterface {
         let mut text = VGAText::new();
         text.pointer = Pointer::new();
         Self::disable_cursor();
-        text.pointer.set_max_y(24);
+        text.pointer.set_max_y(25);
         Self {
             vga_text: text,
             keyboard_nav_event: KeyboardNavEvent::default(),
@@ -86,7 +86,7 @@ impl TextUserInterface {
                 _ => {}
             }
 
-            log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
+            // log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
             if scancode == 0x1 {
                 panic!("Exiting");
             }
