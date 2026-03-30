@@ -1,20 +1,28 @@
-use crate::backend::allocator::BITMAP_PAGE;
 use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
+use crate::backend::memory::init_heap;
+use crate::backend::memory::pmm::BITMAP_PAGE;
+use crate::backend::memory::vmm::MemMapper;
 use crate::backend::paging::init_paging;
+use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
 use crate::backend::{qemu_shutdown, wait};
-use crate::{println, run_test};
+use crate::{log, println, run_test};
+use alloc::vec::Vec;
 
 pub fn protected_main() {
     init_paging();
+    unsafe { init_heap() }
+
 
     unsafe { Pic::remap() }
     unsafe { load_idt() }
     Serial::outb(0x21, 0xFC); // activate interrupts
-    unsafe {
-        core::arch::asm!("sti");
-    }
+
+    log!("test");
+
+
+    log!("test");
 
     // unsafe {
     //     let ptr = 0x8000 as *mut u8;
@@ -26,16 +34,16 @@ pub fn protected_main() {
     // }
 
     unsafe {
-        let p1 = BITMAP_PAGE.lock().alloc_frame().unwrap();
-        println!("{}", p1);
-        let p2 = BITMAP_PAGE.lock().alloc_frame().unwrap();
-        println!("{}", p2);
-        BITMAP_PAGE
-            .lock()
-            .free_frame(p1)
-            .expect("TODO: panic message");
-        let p3 = BITMAP_PAGE.lock().alloc_frame().unwrap();
-        println!("{}", p3);
+        use alloc::boxed::Box;
+        let test_value = Box::new(42);
+        log!(Info, "Heap value: {}", *test_value);
+    }
+
+    log!("test");
+
+
+    unsafe {
+        core::arch::asm!("sti");
     }
     run_test();
 }

@@ -5,7 +5,7 @@ use core::arch::asm;
 use core::sync::atomic::Ordering;
 use core::sync::atomic::Ordering::Relaxed;
 
-pub mod allocator;
+pub mod memory;
 pub mod descriptors;
 pub mod interrupts;
 pub mod paging;

@@ -18,6 +18,8 @@ pub struct PageEntry {
 }
 
 #[repr(C, align(4096))]
+#[derive(Copy)]
+#[derive(Clone)]
 pub struct PageTable {
     pub entries: [PageEntry; 1024],
 }
@@ -25,34 +27,43 @@ pub struct PageTable {
 pub static mut PAGE_DIRECTORY: PageTable = PageTable {
     entries: [PageEntry::from_bits(0); 1024],
 };
-static mut FIRST_PAGE_TABLE: PageTable = PageTable {
-    entries: [PageEntry::from_bits(0); 1024],
-};
+static mut FIRSTS_PAGES_TABLES: [PageTable; 32] = [
+    PageTable { entries: [PageEntry::from_bits(0); 1024] }; 32
+];
 
 pub fn init_paging() {
     unsafe {
-        for i in 0..1024 {
-            FIRST_PAGE_TABLE.entries[i] = PageEntry::default()
-                .with_present(true)
-                .with_rw(true)
-                .with_us(false)
-                .with_frame_index(i);
+        for x in 0..32 {
+            for i in 0..1024 {
+                FIRSTS_PAGES_TABLES[x].entries[i] = PageEntry::default()
+                    .with_present(true)
+                    .with_rw(true)
+                    .with_us(false)
+                    .with_frame_index(x* 1024 + i);
+            }
         }
 
         for i in 0..1024 {
             PAGE_DIRECTORY.entries[i] = PageEntry::default().with_rw(true)
         }
 
-        let pt_address = &raw const FIRST_PAGE_TABLE as *const _ as usize;
-        PAGE_DIRECTORY.entries[0] = PageEntry::default()
-            .with_present(true)
-            .with_rw(true)
-            .with_us(false)
-            .with_frame_index(pt_address >> 12);
+        let mut pt_address = &raw const FIRSTS_PAGES_TABLES as *const _ as usize;
+
+        for page in 0..32 {
+            PAGE_DIRECTORY.entries[page] = PageEntry::default()
+                .with_present(true)
+                .with_rw(true)
+                .with_us(false)
+                .with_frame_index(pt_address >> 12);
+
+
+
+            pt_address += size_of::<PageTable>();
+        }
 
         let pd_address = &raw const PAGE_DIRECTORY as *const _ as usize;
         asm!(
-        "mov cr3, ${page_address}",
+        "mov cr3, {page_address}",
         page_address = in(reg) pd_address
         );
 

@@ -6,16 +6,17 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 #![allow(dead_code)]
+extern crate alloc;
 
-use crate::backend::allocator::{BITMAP_PAGE, BitMapPages};
+use crate::backend::memory::pmm::BITMAP_PAGE;
 use crate::backend::descriptors::gdt::GdtDescriptor;
 use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{qemu_shutdown, vga, wait};
-use crate::testing::Testable;
 use crate::user_interface::text_user_interface::TUI;
 use core::arch::asm;
 use core::panic::PanicInfo;
+use crate::testing::Testable;
 
 mod backend;
 mod kernel;
@@ -101,4 +102,10 @@ pub fn test_runner(tests: &[&dyn Testable]) {
     }
     println!("Done all tests, all succeded !");
     qemu_shutdown();
+}
+
+#[cfg(not(test))]
+#[warn(unused)]
+pub fn test_main() {
+
 }
