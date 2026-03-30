@@ -10,8 +10,8 @@
 use crate::backend::allocator::{BITMAP_PAGE, BitMapPages};
 use crate::backend::descriptors::gdt::GdtDescriptor;
 use crate::backend::serial::LogLevel::{Error, Info};
-use crate::backend::{qemu_shutdown, vga, wait};
 use crate::backend::vga::colors::VGAColors::Red;
+use crate::backend::{qemu_shutdown, vga, wait};
 use crate::testing::Testable;
 use crate::user_interface::text_user_interface::TUI;
 use core::arch::asm;
@@ -27,10 +27,13 @@ mod user_interface;
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: usize) -> ! {
     log!("Main");
-    
+
     unsafe {
         // Get a raw pointer to the static bitmap
-        let bitmap_ptr = core::ptr::addr_of_mut!(BITMAP_PAGE);
+        let mut bitmap_ptr = core::ptr::addr_of!(BITMAP_PAGE)
+            .as_ref()
+            .unwrap()
+            .lock();
 
         // Call init through the raw pointer
         (*bitmap_ptr).init(mb_info_ptr);
@@ -69,7 +72,11 @@ fn panic(info: &PanicInfo) -> ! {
 
     TUI.lock().vga_text.change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
-    println!("\n{}", info);
+    println!("\n[ERROR] Shutting down in 100\n{}", info);
+
+    unsafe { asm!("sti") };
+
+    wait(100);
 
     qemu_shutdown();
 }

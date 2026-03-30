@@ -4,7 +4,9 @@ use crate::{log, println};
 use bitfield_struct::bitfield;
 use core::alloc::{AllocError, Allocator, Layout};
 use core::arch::asm;
+use core::error::Error;
 use core::ptr::NonNull;
+use spin::Mutex;
 
 #[repr(C, packed)]
 struct MemoryMapEntry {
@@ -28,13 +30,14 @@ struct MultibootInfo {
     mmap_addr: u32,
 }
 
+const MAX_FRAME: usize = 32768;
 pub struct BitMapPages {
-    pub frame_map: [u32; 32768], // 1 bit by mem page
+    pub frame_map: [u32; MAX_FRAME], // 1 bit by mem page
 }
 
-pub static mut BITMAP_PAGE: BitMapPages = BitMapPages {
-    frame_map: [0xffffffff; 32768],
-};
+pub static BITMAP_PAGE: Mutex<BitMapPages> = Mutex::new(BitMapPages {
+    frame_map: [0xffffffff; MAX_FRAME],
+});
 
 impl BitMapPages {
     pub fn init(&mut self, multibootinfo_ptr: usize) {
@@ -86,7 +89,7 @@ impl BitMapPages {
     }
 
     pub fn set_used(&mut self, frame_index: usize) {
-        if frame_index < 32768 * 32 {
+        if frame_index < MAX_FRAME * 32 {
             let index = frame_index / 32;
             let bit_pos = frame_index % 32;
             self.frame_map[index] |= (1 << bit_pos);
@@ -94,7 +97,7 @@ impl BitMapPages {
     }
 
     pub fn set_free(&mut self, frame_index: usize) {
-        if frame_index < 32768 * 32 {
+        if frame_index < MAX_FRAME * 32 {
             let index = frame_index / 32;
             let bit_pos = frame_index % 32;
             self.frame_map[index] &= !(1 << bit_pos);
@@ -105,5 +108,33 @@ impl BitMapPages {
         let array_idx = frame_index / 32;
         let bit_pos = frame_index % 32;
         (self.frame_map[array_idx] & (1 << bit_pos)) != 0
+    }
+
+    pub fn alloc_frame(&mut self) -> Option<u32> {
+        let mut index: usize = 0;
+        while self.frame_map[index] == 0xFFFFFFFF && index < MAX_FRAME {
+            index += 1;
+        }
+
+        if index >= MAX_FRAME || self.frame_map[index] == 0xFFFFFFFF {
+            return None;
+        }
+
+        let bit_index = self.frame_map[index].trailing_ones();
+        let page_index = index as u32 * 32 + bit_index;
+        self.set_used(page_index as usize);
+
+        Some(page_index * 4096)
+    }
+
+    pub fn free_frame(&mut self, address: u32) -> Result<(), AllocError> {
+        let index = address / 4096;
+        if index > MAX_FRAME as u32 * 32 {
+            return Err(AllocError);
+        }
+
+        self.set_free(index as usize);
+
+        Ok(())
     }
 }
