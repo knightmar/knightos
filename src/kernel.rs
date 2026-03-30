@@ -13,9 +13,11 @@ pub fn protected_main() {
     println!("test");
 
     // unsafe {
-    //     let ptr = 0xdeadbeef as *mut u8;
+    //     let ptr = 0x8000 as *mut u8;
     //     println!("{}", *ptr);
-    //     *ptr = 42;
+    //     for x in 0..1000 {
+    //         *(ptr.wrapping_add(x)) = 255;
+    //     }
     //     println!("{}", *ptr);
     // }
 

@@ -2,27 +2,27 @@ use bitfield_struct::bitfield;
 use core::arch::asm;
 
 #[bitfield(u32)]
-struct PageEntry {
-    present: bool,
-    rw: bool,  // read / write
-    us: bool,  // user / suppervisor
-    pwt: bool, // write through
-    pcd: bool,
-    accessed: bool,  // set by cpu
-    dirty: bool,     // set by cpu
-    page_size: bool, //  0 = 4KB, 1 = 4MB
+pub struct PageEntry {
+    pub present: bool,
+    pub rw: bool,  // read / write
+    pub us: bool,  // user / suppervisor
+    pub pwt: bool, // write through
+    pub pcd: bool,
+    pub accessed: bool,  // set by cpu
+    pub dirty: bool,     // set by cpu
+    pub page_size: bool, //  0 = 4KB, 1 = 4MB
     #[bits(4)]
-    empty: usize,
+    pub empty: usize,
     #[bits(20)]
-    frame_index: usize, // Store Address >> 12
+    pub frame_index: usize, // Store Address >> 12
 }
 
 #[repr(C, align(4096))]
-struct PageTable {
-    entries: [PageEntry; 1024],
+pub struct PageTable {
+    pub entries: [PageEntry; 1024],
 }
 
-static mut PAGE_DIRECTORY: PageTable = PageTable {
+pub static mut PAGE_DIRECTORY: PageTable = PageTable {
     entries: [PageEntry::from_bits(0); 1024],
 };
 static mut FIRST_PAGE_TABLE: PageTable = PageTable {
@@ -52,8 +52,8 @@ pub fn init_paging() {
 
         let pd_address = &raw const PAGE_DIRECTORY as *const _ as usize;
         asm!(
-            "mov cr3, ${page_address}",
-            page_address = in(reg) pd_address
+        "mov cr3, ${page_address}",
+        page_address = in(reg) pd_address
         );
 
         asm!("mov eax, cr0", "or eax, 0x80000000", "mov cr0, eax",)

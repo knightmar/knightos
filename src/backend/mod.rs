@@ -3,3 +3,4 @@ pub mod interrupts;
 pub mod paging;
 pub mod serial;
 pub mod vga;
+pub mod allocator;

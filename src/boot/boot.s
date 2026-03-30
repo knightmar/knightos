@@ -24,7 +24,10 @@ stack_top = stack_bottom + 16384
 .type _start, @function
 _start:
 	mov $stack_top, %esp
-
+	
+    push %ebx  # Argument 2: Pointer to Multiboot Info
+    push %eax  # Argument 1: Magic Number
+    
 	call kernel_main
 	cli
 1:	hlt
