@@ -29,7 +29,7 @@ struct MultibootInfo {
 }
 
 pub struct BitMapPages {
-    frame_map: [u32; 32768], // 1 bit by mem page
+    pub frame_map: [u32; 32768], // 1 bit by mem page
 }
 
 pub static mut BITMAP_PAGE: BitMapPages = BitMapPages {
@@ -92,7 +92,7 @@ impl BitMapPages {
     }
 
     pub fn set_used(&mut self, frame_index: usize) {
-        if frame_index < 32768 {
+        if frame_index < 32768 * 32 {
             let index = frame_index / 32;
             let bit_pos = frame_index % 32;
             self.frame_map[index] |= (1 << bit_pos);
@@ -100,10 +100,16 @@ impl BitMapPages {
     }
 
     pub fn set_free(&mut self, frame_index: usize) {
-        if frame_index < 32768 {
+        if frame_index < 32768 * 32 {
             let index = frame_index / 32;
             let bit_pos = frame_index % 32;
             self.frame_map[index] &= !(1 << bit_pos);
         }
+    }
+
+    pub fn is_used(&self, frame_index: usize) -> bool {
+        let array_idx = frame_index / 32;
+        let bit_pos = frame_index % 32;
+        (self.frame_map[array_idx] & (1 << bit_pos)) != 0
     }
 }

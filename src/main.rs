@@ -9,7 +9,7 @@
 
 use crate::backend::allocator::{BITMAP_PAGE, BitMapPages};
 use crate::backend::descriptors::gdt::GdtDescriptor;
-use crate::backend::serial::LogLevel::Error;
+use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::vga;
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::testing::Testable;
@@ -28,14 +28,26 @@ mod user_interface;
 pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: usize) -> ! {
     log!("Main");
     log!(Error, "{:x}", magic);
+
     unsafe {
         // Get a raw pointer to the static bitmap
         let bitmap_ptr = core::ptr::addr_of_mut!(BITMAP_PAGE);
 
         // Call init through the raw pointer
         (*bitmap_ptr).init(mb_info_ptr);
-    }
 
+        log!(Info, "Page 0 Used: {}", (*bitmap_ptr).is_used(0));
+        log!(
+            Info,
+            "Kernel Used: {}",
+            (*bitmap_ptr).is_used(0x100000 / 4096)
+        );
+        log!(
+            Info,
+            "Free RAM: {}",
+            (*bitmap_ptr).is_used(0x2000000 / 4096)
+        );
+    }
     GdtDescriptor::load_gdt();
     loop {}
 }
