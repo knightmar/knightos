@@ -1,5 +1,6 @@
 mod utils;
 
+use core::sync::atomic::Ordering;
 use crate::backend::interrupts::TICK_COUNT;
 use crate::backend::serial::Serial;
 use crate::backend::vga::colors::VGAColors;
@@ -74,7 +75,7 @@ impl TextUserInterface {
                 0xCB => self.keyboard_nav_event.left = false,
                 0xCD => self.keyboard_nav_event.right = false,
                 0x52 => {
-                    let count = *TICK_COUNT.lock();
+                    let count = TICK_COUNT.load(Ordering::Relaxed);
                     println!(self.vga_text, "{}", count);
                 }
                 0x4f => {

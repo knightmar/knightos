@@ -1,4 +1,6 @@
 use core::arch::asm;
+use crate::backend::wait;
+use crate::{log, println};
 
 pub trait Testable {
     fn run(&self);
@@ -40,3 +42,8 @@ fn trivial_assertion() {
 //         log!(Info, "{}", *ptr);
 //     }
 // }
+
+#[test_case]
+fn wait_test() {
+    wait(50);
+}

@@ -6,12 +6,13 @@ use crate::backend::{serial, vga};
 use crate::user_interface::text_user_interface::TUI;
 use crate::{log, println};
 use core::arch::asm;
+use core::sync::atomic::{AtomicU32, Ordering};
+use core::sync::atomic::Ordering::Relaxed;
 use lazy_static::lazy_static;
 use spin::Mutex;
+use crate::backend::serial::LogLevel::Info;
 
-lazy_static! {
-    pub static ref TICK_COUNT: Mutex<u64> = Mutex::new(0);
-}
+pub static TICK_COUNT: AtomicU32 = AtomicU32::new(0);
 
 #[repr(C)]
 pub struct InterruptStackFrame {
@@ -28,9 +29,7 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn timer_handler(_frame: InterruptStackFrame) {
-    if let Some(mut count) = TICK_COUNT.try_lock() {
-        *count += 1;
-    }
+    TICK_COUNT.fetch_add(1, Relaxed);
 
     if let Some(mut tui) = crate::user_interface::text_user_interface::TUI.try_lock() {
         tui.on_keyboard_nav();

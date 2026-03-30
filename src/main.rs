@@ -10,7 +10,7 @@
 use crate::backend::allocator::{BITMAP_PAGE, BitMapPages};
 use crate::backend::descriptors::gdt::GdtDescriptor;
 use crate::backend::serial::LogLevel::{Error, Info};
-use crate::backend::vga;
+use crate::backend::{qemu_shutdown, vga, wait};
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::testing::Testable;
 use crate::user_interface::text_user_interface::TUI;
@@ -27,8 +27,7 @@ mod user_interface;
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: usize) -> ! {
     log!("Main");
-    log!(Error, "{:x}", magic);
-
+    
     unsafe {
         // Get a raw pointer to the static bitmap
         let bitmap_ptr = core::ptr::addr_of_mut!(BITMAP_PAGE);
@@ -71,11 +70,8 @@ fn panic(info: &PanicInfo) -> ! {
     TUI.lock().vga_text.change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
     println!("\n{}", info);
-    loop {
-        unsafe {
-            asm!("hlt");
-        }
-    }
+
+    qemu_shutdown();
 }
 
 #[cfg(test)]
@@ -97,4 +93,5 @@ pub fn test_runner(tests: &[&dyn Testable]) {
         test.run();
     }
     println!("Done all tests, all succeded !");
+    qemu_shutdown();
 }

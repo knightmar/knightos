@@ -50,12 +50,6 @@ impl BitMapPages {
                 let available =
                     core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).available));
                 let addr = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).base_addr));
-                log!(
-                    Info,
-                    "Setting : {:x}, as {}",
-                    addr,
-                    if available != 1 { "Used" } else { "Unused" }
-                );
 
                 if available == 1 {
                     let start_page = addr / 4096;
