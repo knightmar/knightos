@@ -8,6 +8,7 @@ use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
 use crate::backend::{qemu_shutdown, wait};
 use crate::{log, println, run_test};
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 
 pub fn protected_main() {
@@ -19,25 +20,6 @@ pub fn protected_main() {
     unsafe { load_idt() }
     Serial::outb(0x21, 0xFC); // activate interrupts
     unsafe { init_heap() }
-
-    log!("test");
-
-    // unsafe {
-    //     let ptr = 0x8000 as *mut u8;
-    //     println!("{}", *ptr);
-    //     for x in 0..1000 {
-    //         *(ptr.wrapping_add(x)) = 255;
-    //     }
-    //     println!("{}", *ptr);
-    // }
-
-    unsafe {
-        use alloc::boxed::Box;
-        let test_value = Box::new(42);
-        log!(Info, "Heap value: {}", *test_value);
-    }
-
-    log!("test");
 
     unsafe {
         core::arch::asm!("sti");
