@@ -121,7 +121,7 @@ impl BitMapPages {
             return None;
         }
 
-        let bit_index = self.frame_map[index].trailing_ones();
+        let bit_index = self.frame_map[index].trailing_zeros();
         let page_index = index as u32 * 32 + bit_index;
         self.set_used(page_index as usize);
 

@@ -11,16 +11,14 @@ use crate::{log, println, run_test};
 use alloc::vec::Vec;
 
 pub fn protected_main() {
-    init_paging();
-    unsafe { init_heap() }
+    log!("test");
 
+    init_paging();
 
     unsafe { Pic::remap() }
     unsafe { load_idt() }
     Serial::outb(0x21, 0xFC); // activate interrupts
-
-    log!("test");
-
+    unsafe { init_heap() }
 
     log!("test");
 
@@ -40,7 +38,6 @@ pub fn protected_main() {
     }
 
     log!("test");
-
 
     unsafe {
         core::arch::asm!("sti");

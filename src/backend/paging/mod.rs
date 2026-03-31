@@ -18,8 +18,7 @@ pub struct PageEntry {
 }
 
 #[repr(C, align(4096))]
-#[derive(Copy)]
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct PageTable {
     pub entries: [PageEntry; 1024],
 }
@@ -27,9 +26,9 @@ pub struct PageTable {
 pub static mut PAGE_DIRECTORY: PageTable = PageTable {
     entries: [PageEntry::from_bits(0); 1024],
 };
-static mut FIRSTS_PAGES_TABLES: [PageTable; 32] = [
-    PageTable { entries: [PageEntry::from_bits(0); 1024] }; 32
-];
+static mut FIRSTS_PAGES_TABLES: [PageTable; 32] = [PageTable {
+    entries: [PageEntry::from_bits(0); 1024],
+}; 32];
 
 pub fn init_paging() {
     unsafe {
@@ -39,7 +38,7 @@ pub fn init_paging() {
                     .with_present(true)
                     .with_rw(true)
                     .with_us(false)
-                    .with_frame_index(x* 1024 + i);
+                    .with_frame_index(x * 1024 + i);
             }
         }
 
@@ -56,12 +55,14 @@ pub fn init_paging() {
                 .with_us(false)
                 .with_frame_index(pt_address >> 12);
 
-
-
             pt_address += size_of::<PageTable>();
         }
 
         let pd_address = &raw const PAGE_DIRECTORY as *const _ as usize;
+        PAGE_DIRECTORY.entries[1023] = PageEntry::default()
+            .with_present(true)
+            .with_rw(true)
+            .with_frame_index(pd_address >> 12);
         asm!(
         "mov cr3, {page_address}",
         page_address = in(reg) pd_address

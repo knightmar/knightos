@@ -22,7 +22,8 @@ pub unsafe fn init_heap() {
     let heap_size = heap_end - heap_start;
 
     for p in (heap_start..heap_end).step_by(4096) {
-        if let Some(frame) = BITMAP_PAGE.lock().alloc_frame() {
+        let frame = BITMAP_PAGE.lock().alloc_frame();
+        if let Some(frame) = frame {
             log!(Info, "Mapping heap page: {:x}", p);
             MemMapper::mem_map(p, frame, 0x3);
         }
