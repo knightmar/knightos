@@ -21,6 +21,7 @@ use core::panic::PanicInfo;
 use spin::mutex::Mutex;
 
 mod backend;
+mod img;
 mod kernel;
 mod testing;
 mod user_interface;

@@ -1,15 +1,11 @@
 use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
 use crate::backend::memory::init_heap;
-use crate::backend::memory::pmm::BITMAP_PAGE;
 use crate::backend::memory::vmm::MemMapper;
 use crate::backend::paging::init_paging;
-use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
-use crate::backend::{qemu_shutdown, wait};
-use crate::{BOOT_CONFIG, log, println, run_test};
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use crate::img::IMAGE_DATA;
+use crate::{BOOT_CONFIG, log, run_test};
 
 pub fn protected_main() {
     log!("test");
@@ -39,11 +35,14 @@ pub fn protected_main() {
 
         for y in 0..mbi.fb_height {
             for x in 0..mbi.fb_width {
-                let pixel_offset = (y * mbi.fb_pitch) + (x * (mbi.fb_bpp as u32 / 8));
-                unsafe {
-                    *fb_ptr.add(pixel_offset as usize) = 255_i32.wrapping_add((x * y) as i32) as u8; // Blue
-                    *fb_ptr.add(pixel_offset as usize + 1) = 100_i32.wrapping_add((x + y) as i32) as u8; // Green
-                    *fb_ptr.add(pixel_offset as usize + 2) = 50_i32.wrapping_add((x / (y+1) ) as i32) as u8; // Red
+                if x < 467 && y < 616 {
+                    let pixel_offset = (y * mbi.fb_pitch) + (x * (mbi.fb_bpp as u32 / 8));
+                    let triplet = IMAGE_DATA[y as usize][x as usize];
+                    unsafe {
+                        *fb_ptr.add(pixel_offset as usize) = triplet.2; // Blue
+                        *fb_ptr.add(pixel_offset as usize + 1) = triplet.1; // Green
+                        *fb_ptr.add(pixel_offset as usize + 2) = triplet.0; // Red
+                    }
                 }
             }
         }
