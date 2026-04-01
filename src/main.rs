@@ -21,10 +21,10 @@ use core::panic::PanicInfo;
 use spin::mutex::Mutex;
 
 mod backend;
-mod img;
 mod kernel;
 mod testing;
 mod user_interface;
+mod utils;
 
 #[derive(Copy, Clone)]
 pub struct BootConfig {
@@ -42,7 +42,7 @@ pub static BOOT_CONFIG: Mutex<Option<BootConfig>> = Mutex::new(None);
 #[allow(clippy::empty_loop)]
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]
-pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: *const MultibootInfo) -> ! {
+pub unsafe extern "C" fn kernel_main(magic: u32, mb_info_ptr: *const MultibootInfo) -> ! {
     log!("Main");
 
     unsafe {

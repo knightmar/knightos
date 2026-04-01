@@ -33,12 +33,14 @@ impl MemMapper {
         asm!("invlpg [{}]", in(reg) vaddr);
     }
 
-    pub unsafe fn map_range(vaddr_start: u32, paddr_start: u32, size: u32, flags: u32) {
-        let start = vaddr_start & !0xFFF;
-        let p_start = paddr_start & !0xFFF;
+    pub fn map_range(vaddr_start: u32, paddr_start: u32, size: u32, flags: u32) {
+        unsafe {
+            let start = vaddr_start & !0xFFF;
+            let p_start = paddr_start & !0xFFF;
 
-        for offset in (0..size).step_by(4096) {
-            Self::mem_map(start + offset, p_start + offset, flags);
+            for offset in (0..size).step_by(4096) {
+                Self::mem_map(start + offset, p_start + offset, flags);
+            }
         }
     }
 }
