@@ -17,18 +17,37 @@ struct MemoryMapEntry {
     pub available: u32,
 }
 
+#[derive(Copy, Clone)]
 #[repr(C)]
-struct MultibootInfo {
-    flags: u32,
-    mem_lower: u32,
-    mem_upper: u32,
-    boot_device: u32,
-    cmdline: u32,
-    mods_count: u32,
-    mods_addr: u32,
-    syms: [u32; 4],
-    mmap_length: u32,
-    mmap_addr: u32,
+pub struct MultibootInfo {
+    pub flags: u32,
+    pub mem_lower: u32,
+    pub mem_upper: u32,
+    pub boot_device: u32,
+    pub cmdline: u32,
+    pub mods_count: u32,
+    pub mods_addr: u32,
+    pub syms: [u32; 4],
+    pub mmap_length: u32,
+    pub mmap_addr: u32,
+    pub drives_length: u32,
+    pub drives_addr: u32,
+    pub config_table: u32,
+    pub boot_loader_name: u32,
+    pub apm_table: u32,
+    pub vbe_control_info: u32,
+    pub vbe_mode_info: u32,
+    pub vbe_mode: u16,
+    pub vbe_interface_seg: u16,
+    pub vbe_interface_off: u16,
+    pub vbe_interface_len: u16,
+    pub framebuffer_addr: u64, // Physical address
+    pub framebuffer_pitch: u32,
+    pub framebuffer_width: u32,
+    pub framebuffer_height: u32,
+    pub framebuffer_bpp: u8,
+    pub framebuffer_type: u8, // 0 = Indexed, 1 = RGB, 2 = EGA Text
+    pub color_info: [u8; 6],
 }
 
 const MAX_FRAME: usize = 32768;
@@ -41,7 +60,7 @@ pub static BITMAP_PAGE: Mutex<BitMapPages> = Mutex::new(BitMapPages {
 });
 
 impl BitMapPages {
-    pub fn init(&mut self, multibootinfo_ptr: usize) {
+    pub fn init(&mut self, multibootinfo_ptr: *const MultibootInfo) {
         unsafe {
             // get mem size from bootloader
             // init all frame map depending on which are used
@@ -85,7 +104,7 @@ impl BitMapPages {
             }
 
             // multiboot info
-            self.set_used(multibootinfo_ptr / 4096);
+            self.set_used((multibootinfo_ptr as usize) / 4096);
         }
     }
 

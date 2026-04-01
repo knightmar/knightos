@@ -8,33 +8,45 @@
 #![allow(dead_code)]
 extern crate alloc;
 
-use crate::backend::memory::pmm::BITMAP_PAGE;
 use crate::backend::descriptors::gdt::GdtDescriptor;
+use crate::backend::memory::pmm::{BITMAP_PAGE, MultibootInfo};
+use crate::backend::memory::vmm::MemMapper;
 use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{qemu_shutdown, vga, wait};
+use crate::testing::Testable;
 use crate::user_interface::text_user_interface::TUI;
 use core::arch::asm;
 use core::panic::PanicInfo;
-use crate::testing::Testable;
+use spin::mutex::Mutex;
 
 mod backend;
 mod kernel;
 mod testing;
 mod user_interface;
 
+#[derive(Copy, Clone)]
+pub struct BootConfig {
+    pub fb_addr: u64,
+    pub fb_width: u32,
+    pub fb_height: u32,
+    pub fb_pitch: u32,
+    pub fb_bpp: u8,
+    pub mem_upper: u32,
+}
+
+// This is perfectly safe and "Send" because it contains no pointers
+pub static BOOT_CONFIG: Mutex<Option<BootConfig>> = Mutex::new(None);
+
 #[allow(clippy::empty_loop)]
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]
-pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: usize) -> ! {
+pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: *const MultibootInfo) -> ! {
     log!("Main");
 
     unsafe {
         // Get a raw pointer to the static bitmap
-        let mut bitmap_ptr = core::ptr::addr_of!(BITMAP_PAGE)
-            .as_ref()
-            .unwrap()
-            .lock();
+        let mut bitmap_ptr = core::ptr::addr_of!(BITMAP_PAGE).as_ref().unwrap().lock();
 
         // Call init through the raw pointer
         (*bitmap_ptr).init(mb_info_ptr);
@@ -50,7 +62,21 @@ pub extern "C" fn kernel_main(magic: u32, mb_info_ptr: usize) -> ! {
             "Free RAM: {}",
             (*bitmap_ptr).is_used(0x2000000 / 4096)
         );
+
+        let mbi = &*mb_info_ptr;
+        let config = BootConfig {
+            fb_addr: mbi.framebuffer_addr,
+            fb_width: mbi.framebuffer_width,
+            fb_height: mbi.framebuffer_height,
+            fb_pitch: mbi.framebuffer_pitch,
+            fb_bpp: mbi.framebuffer_bpp,
+            mem_upper: mbi.mem_upper,
+        };
+        let mut guard = BOOT_CONFIG.lock();
+        *guard = Some(config);
+        drop(guard);
     }
+
     GdtDescriptor::load_gdt();
     loop {}
 }
@@ -106,6 +132,4 @@ pub fn test_runner(tests: &[&dyn Testable]) {
 
 #[cfg(not(test))]
 #[warn(unused)]
-pub fn test_main() {
-
-}
+pub fn test_main() {}

@@ -1,6 +1,7 @@
 .set ALIGN,    1<<0             /* align loaded modules on page boundaries */
 .set MEMINFO,  1<<1             /* provide memory map */
-.set FLAGS,    ALIGN | MEMINFO  /* this is the Multiboot 'flag' field */
+.set VIDEO,    1<<2             /* video mode */
+.set FLAGS,    ALIGN | MEMINFO | VIDEO  /* this is the Multiboot 'flag' field */
 .set MAGIC,    0x1BADB002       /* 'magic number' lets bootloader find the header */
 .set CHECKSUM, -(MAGIC + FLAGS) /* checksum of above, to prove we are multiboot */
 
@@ -11,6 +12,11 @@
 .long FLAGS
 .long CHECKSUM
 
+.long 0, 0, 0, 0, 0    # Address fields (not used if only Bit 2 is set)
+.long 0                # 0 = Linear Framebuffer, 1 = EGA text
+.long 1024             # Width
+.long 768              # Height
+.long 32               # Bits per pixel
 
 .section .bss
 .align 16
