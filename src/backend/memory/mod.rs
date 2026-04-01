@@ -17,14 +17,13 @@ pub unsafe fn memset_u32(ptr: *mut u32, value: u32, count: usize) {
 }
 
 pub unsafe fn init_heap() {
-    let heap_start = 0x40000000;
-    let heap_end = 0x40100000;
-    let heap_size = heap_end - heap_start;
+    let heap_start = 0x10000000;
+    let heap_size = 16 * 1024 * 1024; // 16 MB
+    let heap_end = heap_start + heap_size;
 
     for p in (heap_start..heap_end).step_by(4096) {
         let frame = BITMAP_PAGE.lock().alloc_frame();
         if let Some(frame) = frame {
-            log!(Info, "Mapping heap page: {:x}", p);
             MemMapper::mem_map(p, frame, 0x3);
         }
     }

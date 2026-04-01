@@ -1,7 +1,6 @@
 use crate::backend::serial::LogLevel::Error;
 use crate::backend::vga::colors::VGAColors;
 use crate::backend::vga::colors::VGAColors::*;
-use crate::user_interface::text_user_interface::TUI;
 use crate::{get_colors, log};
 use core::fmt;
 use core::fmt::Write;
@@ -11,7 +10,6 @@ mod macros;
 
 pub fn force_unlock() {
     unsafe {
-        TUI.force_unlock();
     }
 }
 
@@ -19,12 +17,12 @@ unsafe impl Send for VGAText {}
 unsafe impl Sync for VGAText {}
 
 pub fn _print(args: fmt::Arguments) {
-    use core::fmt::Write;
-    if let Some(mut guard) = TUI.try_lock() {
-        let _ = guard.vga_text.write_fmt(args);
-    } else {
-        log!(Error, "Unable to lock TUI when printing");
-    }
+    // use core::fmt::Write;
+    // if let Some(mut guard) = TUI.try_lock() {
+    //     let _ = guard.vga_text.write_fmt(args);
+    // } else {
+    //     log!(Error, "Unable to lock TUI when printing");
+    // }
 }
 
 pub struct Pointer {

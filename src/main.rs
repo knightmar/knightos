@@ -15,7 +15,6 @@ use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{qemu_shutdown, vga, wait};
 use crate::testing::Testable;
-use crate::user_interface::text_user_interface::TUI;
 use core::arch::asm;
 use core::panic::PanicInfo;
 use spin::mutex::Mutex;
@@ -98,7 +97,7 @@ pub fn run_test() {
 fn panic(info: &PanicInfo) -> ! {
     vga::force_unlock();
 
-    TUI.lock().vga_text.change_fg_color(Red);
+    // TUI.lock().vga_text.change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
     println!("\n[ERROR] Shutting down in 100\n{}", info);
 
@@ -112,7 +111,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    TUI.lock().vga_text.change_fg_color(Red);
+    // TUI.lock().vga_text.change_fg_color(Red);
     println!("\n[failed]\n{}", info);
     loop {
         unsafe {

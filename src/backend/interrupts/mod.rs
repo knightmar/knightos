@@ -3,7 +3,6 @@ mod utils;
 use crate::backend::serial::Serial;
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{serial, vga};
-use crate::user_interface::text_user_interface::TUI;
 use crate::{log, println};
 use core::arch::asm;
 use core::sync::atomic::{AtomicU32, Ordering};
@@ -11,6 +10,7 @@ use core::sync::atomic::Ordering::Relaxed;
 use lazy_static::lazy_static;
 use spin::Mutex;
 use crate::backend::serial::LogLevel::Info;
+use crate::user_interface::INPUT_SYSTEM;
 
 pub static TICK_COUNT: AtomicU32 = AtomicU32::new(0);
 
@@ -31,10 +31,6 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 pub extern "x86-interrupt" fn timer_handler(_frame: InterruptStackFrame) {
     TICK_COUNT.fetch_add(1, Relaxed);
 
-    if let Some(mut tui) = crate::user_interface::text_user_interface::TUI.try_lock() {
-        tui.on_keyboard_nav();
-    }
-
     Serial::outb(0x20, 0x20);
 }
 
@@ -51,9 +47,9 @@ pub extern "x86-interrupt" fn double_fault_handler(
 pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
     let scancode = Serial::inb(0x60);
 
-    let mut tui = crate::user_interface::text_user_interface::TUI.lock();
+    let mut input = INPUT_SYSTEM.lock();
 
-    tui.on_keyboard_event(scancode);
+    input.on_keyboard_event(scancode);
     // end of interrupt
     Serial::outb(0x20, 0x20);
 }
@@ -65,10 +61,10 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     vga::force_unlock();
     serial::force_unlock();
 
-    TUI.lock().vga_text.change_fg_color(Red);
-
-    println!("EXCEPTION: PAGE FAULT");
-    println!("Accessed Address: {:#x}", accessed_address);
-    println!("Error Code: {:#b}", error_code);
+    // INPUT_SYSTEM.lock().vga_text.change_fg_color(Red);
+    // 
+    // println!("EXCEPTION: PAGE FAULT");
+    // println!("Accessed Address: {:#x}", accessed_address);
+    // println!("Error Code: {:#b}", error_code);
     panic!("Page error occurred, check logs for more infos");
 }
