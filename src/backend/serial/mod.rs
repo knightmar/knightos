@@ -72,7 +72,7 @@ impl Serial {
         Self::outb(self.port + 0, 0xAE);
 
         if Self::inb(self.port + 0) != 0xAE {
-            return Err("test");
+            return Err("Serial init error");
         }
 
         Self::outb(self.port + 4, 0x0F);
