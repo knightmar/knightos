@@ -1,16 +1,15 @@
-use alloc::vec;
-use alloc::vec::Vec;
 use crate::backend::memory::memset_u32;
 use crate::backend::memory::vmm::MemMapper;
 use crate::utils::NotInitError;
 use crate::{BOOT_CONFIG, BootConfig};
+use alloc::vec;
+use alloc::vec::Vec;
 use core::ops::Add;
 
 pub struct GraphicsHelper {
     boot_config: BootConfig,
     fb_ptr: *mut u8,
     back_buffer: Vec<u8>,
-
 }
 pub struct Point {
     x: u32,
@@ -93,6 +92,7 @@ impl GraphicsHelper {
                 self.fb_ptr,
                 self.back_buffer.len(),
             );
+            core::arch::asm!("mfence");
         }
     }
 }

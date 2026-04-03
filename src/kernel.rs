@@ -4,6 +4,7 @@ use crate::backend::memory::init_heap;
 use crate::backend::memory::vmm::MemMapper;
 use crate::backend::paging::init_paging;
 use crate::backend::serial::Serial;
+use crate::backend::wait;
 use crate::user_interface::INPUT_SYSTEM;
 use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper};
 use crate::{BOOT_CONFIG, log, run_test};
@@ -19,8 +20,6 @@ pub fn protected_main() {
     unsafe { load_idt() }
     Serial::outb(0x21, 0xFC); // activate interrupts
 
-
-
     unsafe { init_heap() }
 
     unsafe {
@@ -31,7 +30,6 @@ pub fn protected_main() {
     let mut y_offset = 0;
     let mut result = GraphicsHelper::new().unwrap();
     loop {
-
         let input = *INPUT_SYSTEM.lock();
         let speed = 5;
 
@@ -60,6 +58,7 @@ pub fn protected_main() {
         }
 
         result.flush();
+        wait(1);
     }
     run_test();
 }
