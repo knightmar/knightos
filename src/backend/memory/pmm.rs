@@ -64,13 +64,10 @@ impl BitMapPages {
         unsafe {
             let info = &*multibootinfo_ptr;
 
-            // 1. Check if the mmap is actually provided by the bootloader
             if (info.flags & (1 << 6)) == 0 {
-                // If this happens, your assembly flags are still wrong
                 panic!("Bootloader did not provide a memory map!");
             }
 
-            // 2. Clear available RAM based on Multiboot
             let mut ptr = info.mmap_addr;
             while ptr < (info.mmap_addr + info.mmap_length) {
                 let map_entry = ptr as *const MemoryMapEntry;
@@ -89,7 +86,6 @@ impl BitMapPages {
                 ptr += size + 4;
             }
 
-            // 3. PROTECT KERNEL AND TABLES (Must happen AFTER the loop above)
             unsafe extern "C" {
                 static _kernel_start: u8;
                 static _kernel_end: u8;
@@ -98,15 +94,12 @@ impl BitMapPages {
             let start = &_kernel_start as *const u8 as usize;
             let end = &_kernel_end as *const u8 as usize;
 
-            // Mark entire kernel range as used
             for page in (start / 4096)..((end + 4095) / 4096) {
                 self.set_used(page);
             }
 
-            // Mark Page Directory and Identity Tables specifically (safety)
             self.set_used((&raw const PAGE_DIRECTORY as usize) / 4096);
 
-            // Mark Low Memory (0..1MB) to protect BIOS/VGA/Multiboot
             for page in 0..256 {
                 self.set_used(page);
             }
@@ -136,20 +129,23 @@ impl BitMapPages {
     }
 
     pub fn alloc_frame(&mut self) -> Option<u32> {
-        let mut index: usize = 0;
-        while self.frame_map[index] == 0xFFFFFFFF && index < MAX_FRAME {
-            index += 1;
+        for index in 0..MAX_FRAME {
+            let entry = self.frame_map[index];
+
+            if entry != 0xFFFFFFFF {
+                for bit in 0..32 {
+                    if (entry & (1 << bit)) == 0 {
+                        let page_index = index * 32 + bit;
+
+                        self.set_used(page_index);
+
+                        return Some((page_index as u32) * 4096);
+                    }
+                }
+            }
         }
 
-        if index >= MAX_FRAME || self.frame_map[index] == 0xFFFFFFFF {
-            return None;
-        }
-
-        let bit_index = self.frame_map[index].trailing_zeros();
-        let page_index = index as u32 * 32 + bit_index;
-        self.set_used(page_index as usize);
-
-        Some(page_index * 4096)
+        None
     }
 
     pub fn free_frame(&mut self, address: u32) -> Result<(), AllocError> {
