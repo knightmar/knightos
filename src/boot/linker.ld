@@ -10,6 +10,8 @@ PHDRS
 SECTIONS
 {
     . = 2M;
+    _kernel_start = .;
+
 
     .text : ALIGN(0x1000)
     {

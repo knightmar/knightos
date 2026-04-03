@@ -1,16 +1,16 @@
 mod utils;
 
+use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::serial::Serial;
 use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{serial, vga};
+use crate::user_interface::INPUT_SYSTEM;
 use crate::{log, println};
 use core::arch::asm;
-use core::sync::atomic::{AtomicU32, Ordering};
 use core::sync::atomic::Ordering::Relaxed;
+use core::sync::atomic::{AtomicU32, Ordering};
 use lazy_static::lazy_static;
 use spin::Mutex;
-use crate::backend::serial::LogLevel::Info;
-use crate::user_interface::INPUT_SYSTEM;
 
 pub static TICK_COUNT: AtomicU32 = AtomicU32::new(0);
 
@@ -62,9 +62,9 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     serial::force_unlock();
 
     // INPUT_SYSTEM.lock().vga_text.change_fg_color(Red);
-    // 
-    // println!("EXCEPTION: PAGE FAULT");
-    // println!("Accessed Address: {:#x}", accessed_address);
-    // println!("Error Code: {:#b}", error_code);
+    //
+    log!(Error, "EXCEPTION: PAGE FAULT");
+    log!(Error, "Accessed Address: {:#x}", accessed_address);
+    log!(Error, "Error Code: {:#b}", error_code);
     panic!("Page error occurred, check logs for more infos");
 }

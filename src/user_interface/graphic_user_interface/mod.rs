@@ -82,12 +82,8 @@ impl GraphicsHelper {
 
     pub fn draw_line(&self, a: Point, b: Point) {}
 
-    pub fn clear_screen(&self) {
-        let total_bytes = (self.boot_config.fb_pitch * self.boot_config.fb_height) as usize;
-
-        unsafe {
-            memset_u32(self.fb_ptr as *mut u32, 0, total_bytes / 4);
-        }
+    pub fn clear_screen(&mut self) {
+        self.back_buffer.fill(0);
     }
 
     pub fn flush(&self) {

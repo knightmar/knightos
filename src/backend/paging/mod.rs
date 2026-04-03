@@ -33,7 +33,7 @@ static mut FIRSTS_PAGES_TABLES: [PageTable; 32] = [PageTable {
 pub fn init_paging() {
     unsafe {
         for x in 0..32 {
-            for i in 1..1024 {
+            for i in 0..1024 {
                 FIRSTS_PAGES_TABLES[x].entries[i] = PageEntry::default()
                     .with_present(true)
                     .with_rw(true)

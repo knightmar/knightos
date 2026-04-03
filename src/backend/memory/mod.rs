@@ -1,9 +1,9 @@
 use crate::backend::memory::pmm::BITMAP_PAGE;
 use crate::backend::memory::vmm::MemMapper;
-use core::ffi::c_void;
-use linked_list_allocator::LockedHeap;
 use crate::backend::serial::LogLevel::Info;
 use crate::log;
+use core::ffi::c_void;
+use linked_list_allocator::LockedHeap;
 
 pub mod pmm;
 pub mod vmm;
@@ -22,10 +22,12 @@ pub unsafe fn init_heap() {
     let heap_end = heap_start + heap_size;
 
     for p in (heap_start..heap_end).step_by(4096) {
-        let frame = BITMAP_PAGE.lock().alloc_frame();
-        if let Some(frame) = frame {
-            MemMapper::mem_map(p, frame, 0x3);
-        }
+        let frame = BITMAP_PAGE
+            .lock()
+            .alloc_frame()
+            .expect("OUT OF PHYSICAL MEMORY: Increase QEMU RAM (-m 512M)");
+
+        MemMapper::mem_map(p, frame, 0x3);
     }
 
     unsafe {

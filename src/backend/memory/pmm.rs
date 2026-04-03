@@ -62,49 +62,54 @@ pub static BITMAP_PAGE: Mutex<BitMapPages> = Mutex::new(BitMapPages {
 impl BitMapPages {
     pub fn init(&mut self, multibootinfo_ptr: *const MultibootInfo) {
         unsafe {
-            // get mem size from bootloader
-            // init all frame map depending on which are used
+            let info = &*multibootinfo_ptr;
 
-            let info = multibootinfo_ptr as *const MultibootInfo;
-            let mut ptr = (*info).mmap_addr;
-            while (ptr) < ((*info).mmap_addr + (*info).mmap_length) {
+            // 1. Check if the mmap is actually provided by the bootloader
+            if (info.flags & (1 << 6)) == 0 {
+                // If this happens, your assembly flags are still wrong
+                panic!("Bootloader did not provide a memory map!");
+            }
+
+            // 2. Clear available RAM based on Multiboot
+            let mut ptr = info.mmap_addr;
+            while ptr < (info.mmap_addr + info.mmap_length) {
                 let map_entry = ptr as *const MemoryMapEntry;
                 let size = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).size));
-                let available =
-                    core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).available));
+                let m_type = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).available));
                 let addr = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).base_addr));
+                let len = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).length));
 
-                if available == 1 {
-                    let start_page = addr / 4096;
-                    let page_count = (*map_entry).length / 4096;
+                if m_type == 1 { // Available RAM
+                    let start_page = (addr / 4096) as usize;
+                    let page_count = (len / 4096) as usize;
                     for page in 0..page_count {
-                        self.set_free((start_page + page as u64) as usize)
+                        self.set_free(start_page + page);
                     }
                 }
-
                 ptr += size + 4;
             }
 
-            // manual values
-            self.set_used(0);
-            // kernel mem
+            // 3. PROTECT KERNEL AND TABLES (Must happen AFTER the loop above)
             unsafe extern "C" {
+                static _kernel_start: u8;
                 static _kernel_end: u8;
             }
 
-            let end_idx = (&_kernel_end as *const u8 as usize) / 4096;
-            for page in (0x100000 / 4096)..end_idx {
-                self.set_used(page)
-            }
-            // mem map
-            let mmap_addr = (*info).mmap_addr;
-            let mmap_count = ((*info).mmap_length + 4095) / 4096;
-            for p in 0..mmap_count {
-                self.set_used(((mmap_addr / 4096) + p) as usize);
+            let start = &_kernel_start as *const u8 as usize;
+            let end = &_kernel_end as *const u8 as usize;
+
+            // Mark entire kernel range as used
+            for page in (start / 4096)..((end + 4095) / 4096) {
+                self.set_used(page);
             }
 
-            // multiboot info
-            self.set_used((multibootinfo_ptr as usize) / 4096);
+            // Mark Page Directory and Identity Tables specifically (safety)
+            self.set_used((&raw const PAGE_DIRECTORY as usize) / 4096);
+
+            // Mark Low Memory (0..1MB) to protect BIOS/VGA/Multiboot
+            for page in 0..256 {
+                self.set_used(page);
+            }
         }
     }
 

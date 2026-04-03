@@ -28,6 +28,7 @@ pub fn protected_main() {
     let mut y_offset = 0;
     let mut result = GraphicsHelper::new().unwrap();
     loop {
+
         let input = *INPUT_SYSTEM.lock();
 
         if input.keyboard_nav_event.right {

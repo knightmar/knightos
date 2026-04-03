@@ -10,6 +10,7 @@ run: build
 	    -chardev stdio,mux=on,id=char0,logfile=serial.log,signal=off \
         -mon chardev=char0 \
         -serial chardev:char0 \
+        -m 512M
 
 clear:
 	rm -Rrf build || true
