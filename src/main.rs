@@ -9,10 +9,8 @@
 extern crate alloc;
 
 use crate::backend::descriptors::gdt::GdtDescriptor;
-use crate::backend::memory::pmm::{BITMAP_PAGE, MultibootInfo};
-use crate::backend::memory::vmm::MemMapper;
-use crate::backend::serial::LogLevel::{Error, Info};
-use crate::backend::vga::colors::VGAColors::Red;
+use crate::backend::memory::pmm::{MultibootInfo, BITMAP_PAGE};
+use crate::backend::serial::LogLevel::Error;
 use crate::backend::{qemu_shutdown, vga, wait};
 use crate::testing::Testable;
 use core::arch::asm;
@@ -51,18 +49,6 @@ pub unsafe extern "C" fn kernel_main(magic: u32, mb_info_ptr: *const MultibootIn
         // Call init through the raw pointer
         (*bitmap_ptr).init(mb_info_ptr);
 
-        log!(Info, "Page 0 Used: {}", (*bitmap_ptr).is_used(0));
-        log!(
-            Info,
-            "Kernel Used: {}",
-            (*bitmap_ptr).is_used(0x100000 / 4096)
-        );
-        log!(
-            Info,
-            "Free RAM: {}",
-            (*bitmap_ptr).is_used(0x2000000 / 4096)
-        );
-
         let mbi = &*mb_info_ptr;
         let config = BootConfig {
             fb_addr: mbi.framebuffer_addr,
@@ -99,11 +85,11 @@ fn panic(info: &PanicInfo) -> ! {
 
     // TUI.lock().vga_text.change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
-    println!("\n[ERROR] Shutting down in 100\n{}", info);
+    println!("\n[ERROR] Shutting down\n{}", info);
 
     unsafe { asm!("sti") };
 
-    wait(100);
+    wait(1000);
 
     qemu_shutdown();
 }
