@@ -14,7 +14,7 @@ pub unsafe fn memset_u32(ptr: *mut u32, value: u32, count: usize) {
 }
 
 pub unsafe fn init_heap() {
-    let heap_start = 0x10000000;
+    let heap_start : u32 = 0x10000000;
     let heap_size = 16 * 1024 * 1024; // 16 MB
     let heap_end = heap_start + heap_size;
 

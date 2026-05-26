@@ -1,9 +1,9 @@
 use crate::backend::memory::memset_u32;
 use crate::backend::memory::pmm::BITMAP_PAGE;
 use crate::backend::paging::{PAGE_DIRECTORY, PageEntry};
-use core::arch::asm;
 use crate::backend::serial::LogLevel::Info;
 use crate::log;
+use core::arch::asm;
 
 pub struct MemMapper {}
 
@@ -22,10 +22,7 @@ impl MemMapper {
                     .with_rw(true)
                     .with_frame_index((phys_frame >> 12) as usize);
 
-                let cr3: u32;
-                asm!("mov {}, cr3", out(reg) cr3);
-                asm!("mov cr3, {}", in(reg) cr3);
-
+                asm!("invlpg [{}]", in(reg) table_vaddr);
 
                 core::ptr::write_bytes(table_vaddr as *mut u8, 0, 4096);
             } else {
@@ -39,7 +36,6 @@ impl MemMapper {
             .with_present(flags & 0b1 == 1);
 
         asm!("invlpg [{}]", in(reg) vaddr);
-
     }
 
     pub fn map_range(vaddr_start: u32, paddr_start: u32, size: u32, flags: u32) {
@@ -47,7 +43,8 @@ impl MemMapper {
             let start = vaddr_start & !0xFFF;
             let p_start = paddr_start & !0xFFF;
 
-            for offset in (0..size).step_by(4096) {
+            let aligned_size = (size + 4095) & !0xFFF;
+            for offset in (0..aligned_size).step_by(4096) {
                 Self::mem_map(start + offset, p_start + offset, flags);
             }
         }

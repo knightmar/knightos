@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
 use crate::backend::memory::init_heap;
@@ -7,7 +8,7 @@ use crate::backend::wait;
 use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper};
 use crate::user_interface::INPUT_SYSTEM;
 use crate::{log, run_test};
-
+use crate::backend::serial::LogLevel::Info;
 // include!("../ressources/image_data.rs");
 
 pub fn protected_main() {
@@ -35,6 +36,17 @@ pub fn protected_main() {
 
     let mut result = GraphicsHelper::new().unwrap();
     result.clear_screen();
+
+
+
+    let mut vec: Vec<u32> = Vec::new();
+    for i in 0..10000 {
+        vec.push(i);
+    }
+
+    for x in vec {
+        log!(Info, "Value: {}", x);
+    }
 
     loop {
         let input = *INPUT_SYSTEM.lock();

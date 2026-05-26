@@ -9,7 +9,7 @@ use core::error::Error;
 use core::ptr::NonNull;
 use spin::Mutex;
 
-#[repr(C, packed)]
+#[repr(C)]
 struct MemoryMapEntry {
     pub size: u32,
     pub base_addr: u64,
@@ -150,7 +150,7 @@ impl BitMapPages {
 
     pub fn free_frame(&mut self, address: u32) -> Result<(), AllocError> {
         let index = address / 4096;
-        if index > MAX_FRAME as u32 * 32 {
+        if index >= (MAX_FRAME * 32) as u32 {
             return Err(AllocError);
         }
 
