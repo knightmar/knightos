@@ -8,7 +8,7 @@ use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper};
 use crate::user_interface::INPUT_SYSTEM;
 use crate::{log, run_test};
 
-include!("../ressources/image_data.rs");
+// include!("../ressources/image_data.rs");
 
 pub fn protected_main() {
     log!("test");
