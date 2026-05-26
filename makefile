@@ -1,4 +1,4 @@
-.PHONY: build run
+.PHONY: build run test clear clean
 
 build:
 	./build.sh
