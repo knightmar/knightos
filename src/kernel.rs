@@ -1,15 +1,31 @@
-use alloc::vec::Vec;
 use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
 use crate::backend::memory::init_heap;
+use crate::backend::multitasking::{SCHEDULER, Scheduler, Task, TaskState, create_task};
 use crate::backend::paging::init_paging;
+use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
 use crate::backend::wait;
-use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper};
 use crate::user_interface::INPUT_SYSTEM;
+use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper};
 use crate::{log, run_test};
-use crate::backend::serial::LogLevel::Info;
+use alloc::vec;
+use alloc::vec::Vec;
 // include!("../ressources/image_data.rs");
+
+fn task_a() {
+    loop {
+        log!("Bonjour de la tâche A !");
+        Scheduler::yield_now();
+    }
+}
+
+fn task_b() {
+    loop {
+        log!("... Et coucou de la tâche B !");
+        Scheduler::yield_now();
+    }
+}
 
 pub fn protected_main() {
     log!("test");
@@ -29,66 +45,37 @@ pub fn protected_main() {
         core::arch::asm!("sti");
     }
 
-    let mut x_offset = 0;
-    let mut y_offset = 0;
-    let mut old_x = 1;
-    let mut old_y = 1;
-
     let mut result = GraphicsHelper::new().unwrap();
     result.clear_screen();
 
+    {
+        let mut scheduler = SCHEDULER.lock();
 
+        let main_task = Task {
+            id: 0,
+            esp: 0,
+            cr3: 0,
+            state: TaskState::UNINITIALIZED,
+            stack: vec![],
+        };
+        scheduler.add_task(main_task).unwrap();
 
-    let mut vec: Vec<u32> = Vec::new();
-    for i in 0..10000 {
-        vec.push(i);
+        let mut t1 = create_task(task_a, 0);
+        t1.id = 1;
+        scheduler.add_task(t1).unwrap();
+
+        let mut t2 = create_task(task_b, 0);
+        t2.id = 2;
+        scheduler.add_task(t2).unwrap();
     }
 
-    for x in vec {
-        log!(Info, "Value: {}", x);
-    }
+    log!("Lancement du multitâche...");
+
+    Scheduler::yield_now();
 
     loop {
-        let input = *INPUT_SYSTEM.lock();
-
-        let speed = 5;
-
-        if input.keyboard_nav_event.right {
-            x_offset += speed;
-        }
-        if input.keyboard_nav_event.left && x_offset > 0 {
-            x_offset -= speed;
-        }
-        if input.keyboard_nav_event.up && y_offset > 0 {
-            y_offset -= speed;
-        }
-        if input.keyboard_nav_event.down {
-            y_offset += speed;
-        }
-
-        if old_x != x_offset || old_y != y_offset {
-            for x in 0..20 {
-                for y in 0..20 {
-                    result.draw_pixel((10 + x + old_x, 10 + y + old_y).into(), Color::new(0, 0, 0));
-                }
-            }
-
-            for x in 0..20 {
-                for y in 0..20 {
-                    result.draw_pixel(
-                        (10 + x + x_offset, 10 + y + y_offset).into(),
-                        Color::new(255, 0, 0),
-                    );
-                }
-            }
-
-            result.flush();
-        }
-
-        wait(1);
-
-        old_x = x_offset;
-        old_y = y_offset;
+        Scheduler::yield_now();
     }
+
     run_test();
 }

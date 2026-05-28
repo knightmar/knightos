@@ -47,6 +47,10 @@ pub unsafe fn load_idt() {
             offset: addr_of!(IDT) as u32,
         };
 
+        for i in 32..48 {
+            IDT[i].set_handler(generic_handler as *const () as u32);
+        }
+
         IDT[3].set_handler(breakpoint_handler as *const () as u32);
         IDT[8].set_handler(double_fault_handler as *const () as u32);
         IDT[32].set_handler(timer_handler as *const () as u32);

@@ -8,6 +8,7 @@ pub mod memory;
 pub mod paging;
 pub mod serial;
 pub mod vga;
+pub mod multitasking;
 
 pub fn wait(time: u32) {
     unsafe {

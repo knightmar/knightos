@@ -15,6 +15,7 @@ use spin::Mutex;
 pub static TICK_COUNT: AtomicU32 = AtomicU32::new(0);
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct InterruptStackFrame {
     pub instruction_pointer: u32,
     pub code_segment: u32,
@@ -67,4 +68,11 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     log!(Error, "Accessed Address: {:#x}", accessed_address);
     log!(Error, "Error Code: {:#b}", error_code);
     panic!("Page error occurred, check logs for more infos");
+}
+
+// fill out handler
+pub extern "x86-interrupt" fn generic_handler(_frame: InterruptStackFrame) {
+    log!(Info, "Unhandled interrupt : {:#?}", _frame);
+    Serial::outb(0x20, 0x20);
+    Serial::outb(0xA0, 0x20);
 }
