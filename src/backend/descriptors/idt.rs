@@ -40,6 +40,10 @@ impl IdtEntry {
     }
 }
 
+unsafe extern "C" {
+    fn double_fault_entry();
+}
+
 pub unsafe fn load_idt() {
     unsafe {
         let idt_ptr = IDTDescriptor {
@@ -47,15 +51,16 @@ pub unsafe fn load_idt() {
             offset: addr_of!(IDT) as u32,
         };
 
-        for i in 32..48 {
+        for i in 0..48 {
             IDT[i].set_handler(generic_handler as *const () as u32);
         }
 
         IDT[3].set_handler(breakpoint_handler as *const () as u32);
-        IDT[8].set_handler(double_fault_handler as *const () as u32);
-        IDT[32].set_handler(timer_handler as *const () as u32);
+        IDT[8].set_handler(double_fault_entry as *const () as u32);
+        IDT[32].set_handler(timer_interrupt_entry as *const () as u32);
         IDT[33].set_handler(keyboard_handler as *const () as u32);
         IDT[14].set_handler(page_fault_handler as *const () as u32);
+        IDT[13].set_handler(gpf_handler as *const () as u32);
 
         // load idt
         asm!(
@@ -63,8 +68,5 @@ pub unsafe fn load_idt() {
         idt_ptr = in(reg) &idt_ptr,
         options(att_syntax),
         );
-
-        // enable interrupts
-        asm!("sti");
     }
 }

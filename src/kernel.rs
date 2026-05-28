@@ -1,7 +1,9 @@
 use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
 use crate::backend::memory::init_heap;
-use crate::backend::multitasking::{SCHEDULER, Scheduler, Task, TaskState, create_task};
+use crate::backend::multitasking::{
+    SCHEDULER, Scheduler, Task, TaskState, create_task, start_scheduler,
+};
 use crate::backend::paging::init_paging;
 use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
@@ -15,67 +17,48 @@ use alloc::vec::Vec;
 
 fn task_a() {
     loop {
-        log!("Bonjour de la tâche A !");
-        Scheduler::yield_now();
+        unsafe { core::arch::asm!("nop") } // Aucun log pour le moment
     }
 }
 
 fn task_b() {
     loop {
-        log!("... Et coucou de la tâche B !");
-        Scheduler::yield_now();
+        unsafe { core::arch::asm!("nop") } // Aucun log pour le moment
     }
 }
 
 pub fn protected_main() {
-    log!("test");
+    log!("Initialisation Système...");
+    unsafe { core::arch::asm!("cli") };
 
     init_paging();
 
     unsafe {
         Pic::remap();
-        Pic::init_timer();
+        Pic::init_timer(); // Make sure your PIT divider is configured here!
     }
+
     unsafe { load_idt() }
-    Serial::outb(0x21, 0xFC); // activate interrupts
+    Serial::outb(0x21, 0xFE); // Unmask IRQ0 (Timer Only). Disables keyboard to avoid conflicts for now.
 
     unsafe { init_heap() }
-
-    unsafe {
-        core::arch::asm!("sti");
-    }
 
     let mut result = GraphicsHelper::new().unwrap();
     result.clear_screen();
 
+    // Register our real execution units inside the scheduler array
     {
         let mut scheduler = SCHEDULER.lock();
 
-        let main_task = Task {
-            id: 0,
-            esp: 0,
-            cr3: 0,
-            state: TaskState::UNINITIALIZED,
-            stack: vec![],
-        };
-        scheduler.add_task(main_task).unwrap();
-
         let mut t1 = create_task(task_a, 0);
-        t1.id = 1;
+        t1.id = 0;
         scheduler.add_task(t1).unwrap();
 
         let mut t2 = create_task(task_b, 0);
-        t2.id = 2;
+        t2.id = 1;
         scheduler.add_task(t2).unwrap();
     }
 
-    log!("Lancement du multitâche...");
-
-    Scheduler::yield_now();
-
-    loop {
-        Scheduler::yield_now();
-    }
-
-    run_test();
+    log!("Lancement du préemptif...");
+    start_scheduler(); // Jumps right into Task A, turning on interrupts during the iret phase!
 }

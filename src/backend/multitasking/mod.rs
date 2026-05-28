@@ -1,6 +1,5 @@
 use crate::backend::multitasking::TaskState::READY;
 use crate::log;
-use alloc::boxed::Box;
 use alloc::vec;
 use alloc::vec::Vec;
 use core::arch::global_asm;
@@ -19,23 +18,30 @@ pub struct Task {
 pub enum TaskState {
     READY,
     SUSPENDED,
-    UNINITIALIZED,
 }
 
-#[repr(C)]
-pub struct CpuContext {
+#[repr(C, packed)]
+pub struct NewTaskFrame {
+    // Layout matching 'pusha' (pushed manually in our assembly ISR)
     edi: u32,
     esi: u32,
-    ebx: u32,
     ebp: u32,
+    esp: u32, // Ignored by popa, but holds space
+    ebx: u32,
+    edx: u32,
+    ecx: u32,
+    eax: u32,
+    // Hardware frame (Pushed automatically by CPU on an interrupt)
     eip: u32,
+    cs: u32,
+    eflags: u32,
 }
 
 pub static SCHEDULER: Mutex<Scheduler> = Mutex::new(Scheduler::new());
 
 pub struct Scheduler {
-    tasks: [Option<Task>; 4],
-    current_task_index: usize,
+    pub(crate) tasks: [Option<Task>; 4],
+    pub(crate) current_task_index: usize,
 }
 
 impl Scheduler {
@@ -55,91 +61,116 @@ impl Scheduler {
         }
     }
 
-    pub(crate) fn switch_next_pointers(&mut self) -> Option<(*mut u32, u32)> {
+    /// Executed on every timer tick. Saves current stack pointer,
+    /// finds next ready task, and returns the new stack pointer.
+    pub(crate) fn switch_next(&mut self, current_esp: u32) -> u32 {
         let current_idx = self.current_task_index;
-        let mut next_idx = None;
 
+        // Save the stack pointer of the task that was just running
+        if let Some(task) = &mut self.tasks[current_idx] {
+            task.esp = current_esp;
+        }
+
+        // Round-robin selection for the next task
+        let mut next_idx = current_idx;
         for offset in 1..=self.tasks.len() {
             let idx = (current_idx + offset) % self.tasks.len();
             if let Some(task) = &self.tasks[idx] {
                 if task.state == READY {
-                    next_idx = Some(idx);
+                    next_idx = idx;
                     break;
                 }
             }
         }
 
-        let next_idx = next_idx?;
         self.current_task_index = next_idx;
-
-        let current = self.tasks[current_idx].as_mut().unwrap();
-        if current.state == TaskState::UNINITIALIZED {
-            current.state = TaskState::READY;
-        }
-
-        let old_esp_ptr = &mut self.tasks[current_idx].as_mut().unwrap().esp as *mut u32;
-        let new_esp = self.tasks[next_idx].as_ref().unwrap().esp;
-
-        Some((old_esp_ptr, new_esp))
-    }
-
-    pub fn yield_now() {
-        unsafe { core::arch::asm!("cli") }; // disable interrupts during switch
-        let mut scheduler = SCHEDULER.lock();
-        if let Some((old_esp, new_esp)) = scheduler.switch_next_pointers() {
-            core::mem::drop(scheduler);
-            unsafe {
-                context_switch(old_esp, new_esp);
-            }
-        }
-
-        unsafe { core::arch::asm!("sti") };
+        self.tasks[next_idx].as_ref().unwrap().esp
     }
 }
 
+// Low-level context hooks called by Assembly/Hardware
 unsafe extern "C" {
-    fn context_switch(old_esp: *mut u32, new_esp: u32);
+    pub fn launch_first_task(new_esp: u32) -> !;
+    pub fn timer_interrupt_handler();
 }
-#[rustfmt::skip]
-global_asm!(
-    ".global context_switch",
-    "context_switch:",
-    "   push ebp",
-    "   push ebx",
-    "   push esi",
-    "   push edi",
-    "   mov eax,[esp + 20]",
-    "   mov [eax],esp",
-    "",
-    "   mov esp, [esp + 24]",
 
-    "   pop edi",
-    "   pop esi",
-    "   pop ebx",
-    "   pop ebp",
-    "   ret",
-);
+#[unsafe(no_mangle)]
+pub extern "C" fn handle_preemptive_switch(current_esp: u32) -> u32 {
+    SCHEDULER.lock().switch_next(current_esp)
+}
 
-pub fn create_task(func: fn(), page_dir: u32) -> Task {
-    let mut stack: Vec<u8> = vec![0; 4096];
-    let stack_top = (stack.as_mut_ptr() as u32) + 4096u32;
-    let context_ptr = stack_top - size_of::<CpuContext>() as u32;
-    let context = CpuContext {
-        edi: 0,
-        esi: 0,
-        ebx: 0,
-        ebp: 0,
-        eip: func as u32,
+pub fn start_scheduler() -> ! {
+    let first_esp = {
+        let scheduler = SCHEDULER.lock();
+        scheduler.tasks[0].as_ref().unwrap().esp
     };
 
     unsafe {
-        *(context_ptr as *mut CpuContext) = context;
+        core::arch::asm!(
+        "mov esp, {0}",
+        "popa",
+        "iret",
+        in(reg) first_esp,
+        options(noreturn)
+        )
+    }
+}
+
+global_asm!(
+    ".global timer_interrupt_entry",
+    "timer_interrupt_entry:",
+    "    pusha",
+
+
+    "    mov ax, 0x10",
+    "    mov ds, ax",
+    "    mov es, ax",
+    "    mov fs, ax",
+    "    mov gs, ax",
+
+    "    mov eax, esp",
+    "    push eax",
+    "    call timer_handler_inner",
+    "    add esp, 4",
+    "    mov esp, eax",
+    "    popa",
+    "    iret",
+);
+
+pub fn create_task(entry_point: fn(), id: usize) -> Task {
+    let stack_size = 8192; // 8 Ko
+    let mut stack = vec![0u8; stack_size];
+
+    let stack_ptr = stack.as_mut_ptr() as u32;
+    let stack_bottom = (stack_ptr + stack_size as u32) & !0xF; // Alignement sur 16 octets
+    let mut esp = stack_bottom;
+
+    unsafe {
+        // --- Trame IRET stricte pour le Ring 0 (3 éléments SEULEMENT) ---
+        esp -= 4; *(esp as *mut u32) = 0x202;      // EFLAGS (Interrupts activées)
+        esp -= 4; *(esp as *mut u32) = 0x08;       // CS (Kernel Code)
+        esp -= 4; *(esp as *mut u32) = entry_point as u32; // EIP
+
+        // --- Trame POPA ---
+        esp -= 4; *(esp as *mut u32) = 0;          // EAX
+        esp -= 4; *(esp as *mut u32) = 0;          // ECX
+        esp -= 4; *(esp as *mut u32) = 0;          // EDX
+        esp -= 4; *(esp as *mut u32) = 0;          // EBX
+        esp -= 4; *(esp as *mut u32) = 0;          // ESP (ignoré par popa)
+        esp -= 4; *(esp as *mut u32) = 0;          // EBP
+        esp -= 4; *(esp as *mut u32) = 0;          // ESI
+        esp -= 4; *(esp as *mut u32) = 0;          // EDI
+    }
+
+    let current_cr3: u32;
+    unsafe {
+        core::arch::asm!("mov {}, cr3", out(reg) current_cr3);
     }
 
     Task {
-        id: 0,
-        esp: context_ptr,
-        cr3: page_dir,
+        id: id as u32,
+        esp,
+        cr3: current_cr3,
         state: TaskState::READY,
         stack,
     }
