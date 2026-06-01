@@ -1,7 +1,11 @@
+pub mod text;
+
 use crate::backend::memory::memset_u32;
 use crate::backend::memory::vmm::MemMapper;
+use crate::backend::serial::LogLevel::Info;
+use crate::user_interface::graphic_user_interface::text::TextManager;
 use crate::utils::NotInitError;
-use crate::{BOOT_CONFIG, BootConfig};
+use crate::{BOOT_CONFIG, BootConfig, log};
 use alloc::vec;
 use alloc::vec::Vec;
 use core::ops::Add;
@@ -53,6 +57,17 @@ impl Color {
     }
 }
 
+impl Add<Point> for &Point {
+    type Output = Point;
+
+    fn add(self, rhs: Point) -> Self::Output {
+        Point {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
 impl GraphicsHelper {
     pub fn new() -> Result<Self, NotInitError> {
         if let Some(guard) = *BOOT_CONFIG.lock() {
@@ -66,6 +81,13 @@ impl GraphicsHelper {
 
             let fb_phys = helper.boot_config.fb_addr as u32;
             let fb_size = helper.boot_config.fb_pitch * helper.boot_config.fb_height;
+
+            log!(
+                Info,
+                "{}x{}",
+                helper.boot_config.fb_width,
+                helper.boot_config.fb_height
+            );
 
             unsafe {
                 MemMapper::map_range(helper.fb_ptr as u32, fb_phys, fb_size, 3);
@@ -86,6 +108,29 @@ impl GraphicsHelper {
             self.back_buffer[offset] = color.b;
             self.back_buffer[offset + 1] = color.g;
             self.back_buffer[offset + 2] = color.r;
+        }
+    }
+
+    pub fn print_char(&mut self, c: char, point: &Point) {
+        let glyph = TextManager::lookup_char(c);
+        for y in 0..15 {
+            for x in 0..7 {
+                let bit = (glyph[y] << x) & 0b10000000;
+                if bit != 0 {
+                    self.draw_pixel(
+                        point
+                            + Point {
+                                x: x as u32,
+                                y: y as u32,
+                            },
+                        Color {
+                            r: 255,
+                            g: 255,
+                            b: 255,
+                        },
+                    )
+                }
+            }
         }
     }
 

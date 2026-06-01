@@ -9,17 +9,20 @@ use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
 use crate::backend::wait;
 use crate::user_interface::INPUT_SYSTEM;
-use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper};
+use crate::user_interface::graphic_user_interface::text::TextManager;
+use crate::user_interface::graphic_user_interface::{Color, GraphicsHelper, Point};
 use crate::{log, run_test};
 use alloc::vec;
 use alloc::vec::Vec;
-// include!("../ressources/image_data.rs");
+use core::arch::asm;
+// include!("../resources/image_data.rs");
 
 fn graphics() {
     let mut graph = GraphicsHelper::new().unwrap();
 
     loop {
         graph.clear_screen();
+        graph.print_char('a', &Point::new(300, 300));
 
         for y in 0..200 {
             for x in 0..200 {
@@ -31,8 +34,18 @@ fn graphics() {
 }
 
 fn task_b() {
+    // let mut vec = Vec::new();
+    // for c in 'A'..'z' {
+    //     log!(Info, "{}", c);
+    //     vec.push(TextManager::lookup_char(c))
+    //
+    // }
+    // log!(Info, "{:?}\n{}", vec, vec.len());
+
     loop {
-        log!("Task B");
+        unsafe {
+            asm!("nop");
+        }
     }
 }
 

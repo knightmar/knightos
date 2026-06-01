@@ -14,8 +14,8 @@
 
 .long 0, 0, 0, 0, 0    # Address fields (not used if only Bit 2 is set)
 .long 0                # 0 = Linear Framebuffer, 1 = EGA text
-.long 1024             # Width
-.long 768              # Height
+.long 1920             # Width
+.long 1080              # Height
 .long 32               # Bits per pixel
 
 .section .bss

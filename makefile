@@ -20,4 +20,4 @@ clean:
 	rm serial.log || true
 	rm -Rrf build || true
 	rm -Rrf knightos.iso || true
-	rm target/x86-unknown-bare_metal/release/deps -Rrf || true
+	rm target -Rrf || true
