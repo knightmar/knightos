@@ -30,7 +30,7 @@ impl Pic {
         Serial::outb(Self::MASTER_DATA, 0x01);
         Serial::outb(Self::SLAVE_DATA, 0x01);
 
-        Serial::outb(Self::MASTER_DATA, 0xFF);
+        Serial::outb(Self::MASTER_DATA, 0xFC);
         Serial::outb(Self::SLAVE_DATA, 0xFF);
     }
 }

@@ -4,20 +4,29 @@ use crate::backend::memory::memset_u32;
 use crate::backend::memory::vmm::MemMapper;
 use crate::backend::serial::LogLevel::Info;
 use crate::user_interface::graphic_user_interface::text::TextManager;
+use crate::user_interface::{InputSystem, KeyboardNavEvent};
 use crate::utils::NotInitError;
 use crate::{BOOT_CONFIG, BootConfig, log};
 use alloc::vec;
 use alloc::vec::Vec;
-use core::ops::Add;
+use core::ops::{Add, AddAssign};
+use lazy_static::lazy_static;
+use spin::mutex::Mutex;
 
+
+lazy_static! {
+    pub static ref GRAPHICS_HELPER: Mutex<GraphicsHelper> =
+        Mutex::new(GraphicsHelper::new().unwrap());
+}
 pub struct GraphicsHelper {
     boot_config: BootConfig,
     fb_ptr: *mut u8,
     back_buffer: Vec<u8>,
 }
+#[derive(Clone, Copy)]
 pub struct Point {
-    x: u32,
-    y: u32,
+    pub(crate) x: u32,
+    pub(crate) y: u32,
 }
 
 impl From<(u32, u32)> for Point {
@@ -67,6 +76,38 @@ impl Add<Point> for &Point {
         }
     }
 }
+
+impl Add for Point {
+    type Output = Point;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Point {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Add<Point> for &mut Point {
+    type Output = Point;
+
+    fn add(self, rhs: Point) -> Self::Output {
+        Point {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl AddAssign for Point {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
+unsafe impl Send for GraphicsHelper {}
+unsafe impl Sync for GraphicsHelper {}
 
 impl GraphicsHelper {
     pub fn new() -> Result<Self, NotInitError> {

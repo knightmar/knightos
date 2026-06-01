@@ -1,8 +1,13 @@
+use crate::backend::serial::LogLevel::Info;
+use crate::log;
+use crate::user_interface::graphic_user_interface::{GRAPHICS_HELPER, Point};
 use crate::user_interface::utils::translate_keys;
+use core::convert::Into;
+use core::ops::{Add, AddAssign};
 use spin::mutex::Mutex;
 
 pub mod graphic_user_interface;
-mod utils;
+pub mod utils;
 
 pub static INPUT_SYSTEM: Mutex<InputSystem> = Mutex::new(InputSystem {
     keyboard_nav_event: KeyboardNavEvent {
@@ -11,11 +16,13 @@ pub static INPUT_SYSTEM: Mutex<InputSystem> = Mutex::new(InputSystem {
         left: false,
         down: false,
     },
+    char_cursor_pos: Point { x: 0, y: 0 },
 });
 
 #[derive(Copy, Clone)]
 pub struct InputSystem {
     pub keyboard_nav_event: KeyboardNavEvent,
+    pub char_cursor_pos: Point,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -41,7 +48,11 @@ impl InputSystem {
     pub fn on_keyboard_event(&mut self, scancode: u8) -> bool {
         let key = translate_keys(scancode);
         if key != '\0' {
-            //
+            log!(Info, "{}", key);
+            let mut guard = GRAPHICS_HELPER.lock();
+            guard.print_char(key, &self.char_cursor_pos);
+            guard.flush();
+            self.char_cursor_pos += Point::new(8, 0);
         } else {
             match scancode {
                 // Press events
@@ -57,7 +68,6 @@ impl InputSystem {
                 _ => {}
             }
 
-            // log!(format_args!("KEYBOARD SCANCODE: {:#x}", scancode));
             if scancode == 0x1 {
                 panic!("Exiting");
             }

@@ -128,12 +128,12 @@ global_asm!(
 );
 
 pub extern "x86-interrupt" fn keyboard_handler(_frame: InterruptStackFrame) {
-    let scancode = Serial::inb(0x60);
+    let scancode: u8 = Serial::inb(0x60);
 
-    let mut input = INPUT_SYSTEM.lock();
+    if let Some(mut ip) = INPUT_SYSTEM.try_lock() {
+        ip.on_keyboard_event(scancode);
+    }
 
-    input.on_keyboard_event(scancode);
-    // end of interrupt
     Serial::outb(0x20, 0x20);
 }
 

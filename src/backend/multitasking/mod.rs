@@ -100,6 +100,7 @@ pub fn start_scheduler() -> ! {
 }
 
 pub fn create_task(entry_point: fn(), id: usize) -> Task {
+    log!(Info, "CREATE: entry_point = {:#x}", entry_point as u32);
     let stack_size = 8192; // 8 Ko
     let mut stack = vec![0u8; stack_size];
 

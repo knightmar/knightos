@@ -23,13 +23,13 @@ lazy_static! {
 pub fn _log(args: fmt::Arguments) {
     let flags: u32;
     unsafe {
-        asm!("pushfd; pop {0}; cli", out(reg) flags, options(nostack));
+        asm!("pushfd; pop {0}; cli", out(reg) flags);
     }
 
     let _ = LOGGER.lock().write_fmt(args);
 
     unsafe {
-        asm!("push {0}; popfd", in(reg) flags, options(nostack));
+        asm!("push {0}; popfd", in(reg) flags);
     }
 }
 
