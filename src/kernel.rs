@@ -15,9 +15,18 @@ use alloc::vec;
 use alloc::vec::Vec;
 // include!("../ressources/image_data.rs");
 
-fn task_a() {
+fn graphics() {
+    let mut graph = GraphicsHelper::new().unwrap();
+
     loop {
-        log!("Task A");
+        graph.clear_screen();
+
+        for y in 0..200 {
+            for x in 0..200 {
+                graph.draw_pixel((x, y).into(), (255, 0, 0).into());
+            }
+            graph.flush();
+        }
     }
 }
 
@@ -43,13 +52,10 @@ pub fn protected_main() {
 
     unsafe { init_heap() }
 
-    let mut result = GraphicsHelper::new().unwrap();
-    result.clear_screen();
-
     {
         let mut scheduler = SCHEDULER.lock();
 
-        let mut t1 = create_task(task_a, 0);
+        let mut t1 = create_task(graphics, 0);
         t1.id = 0;
         scheduler.add_task(t1).unwrap();
 

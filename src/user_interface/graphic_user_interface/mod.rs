@@ -31,6 +31,16 @@ impl Point {
     }
 }
 
+impl From<(u8, u8, u8)> for Color {
+    fn from(value: (u8, u8, u8)) -> Self {
+        Self {
+            r: value.0,
+            g: value.1,
+            b: value.2,
+        }
+    }
+}
+
 pub struct Color {
     r: u8,
     g: u8,
