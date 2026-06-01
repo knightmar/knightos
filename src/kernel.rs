@@ -55,12 +55,10 @@ pub fn protected_main() {
     {
         let mut scheduler = SCHEDULER.lock();
 
-        let mut t1 = create_task(graphics, 0);
-        t1.id = 0;
+        let t1 = create_task(graphics, 0);
         scheduler.add_task(t1).unwrap();
 
-        let mut t2 = create_task(task_b, 1);
-        t2.id = 1;
+        let t2 = create_task(task_b, 1);
         scheduler.add_task(t2).unwrap();
     }
 
