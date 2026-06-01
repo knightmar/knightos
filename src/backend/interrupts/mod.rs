@@ -34,44 +34,59 @@ unsafe extern "C" {
     pub fn timer_interrupt_entry();
 }
 
+// black magic to avoid rust messing up the interrupt stack
 global_asm!(
     ".global timer_interrupt_entry",
     "timer_interrupt_entry:",
     "    pusha",
-    "    mov eax, esp", // ← capture esp AFTER pusha (before push arg)
-    "    push eax",     // push as arg
+    "    mov eax, esp",
+    "    push eax",
     "    call timer_handler_inner",
-    "    add esp, 4",   // clean arg — esp is back to post-pusha position
-    "    mov esp, eax", // eax = returned esp (new or same task's post-pusha esp)
+    "    add esp, 4",
+    "    mov esp, eax",
     "    popa",
-    "    iret",
+    "    iretd",
 );
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn timer_handler_inner(current_esp: u32) -> u32 {
     TICK_COUNT.fetch_add(1, Relaxed);
-
     Serial::outb(0x20, 0x20);
 
     let mut scheduler = SCHEDULER.lock();
-
     scheduler.switch_next(current_esp)
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn double_fault_handler_inner(esp: u32) {
-    // Absolutely minimal — just write to serial directly, no allocations
-    Serial::outb(0x3F8, b'D');
-    Serial::outb(0x3F8, b'F');
-    Serial::outb(0x3F8, b'\n');
+    log!(Error, "Double fault happened T-T");
 
     loop {
-        unsafe { core::arch::asm!("hlt") };
+        unsafe { asm!("hlt") };
     }
 }
 
-pub extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, error_code: u32) {
+pub unsafe extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, error_code: u32) {
     vga::force_unlock();
     serial::force_unlock();
+
+    // Read segment registers / esp / cr3
+    let ds: u32;
+    let es: u32;
+    let fs: u32;
+    let gs: u32;
+    let ss: u32;
+    let esp_reg: u32;
+    let cr3: u32;
+    unsafe {
+        core::arch::asm!("mov {}, ds", out(reg) ds);
+        core::arch::asm!("mov {}, es", out(reg) es);
+        core::arch::asm!("mov {}, fs", out(reg) fs);
+        core::arch::asm!("mov {}, gs", out(reg) gs);
+        core::arch::asm!("mov {}, ss", out(reg) ss);
+        core::arch::asm!("mov {}, esp", out(reg) esp_reg);
+        core::arch::asm!("mov {}, cr3", out(reg) cr3);
+    }
 
     log!(Error, "EXCEPTION: GENERAL PROTECTION FAULT");
     log!(
@@ -82,6 +97,17 @@ pub extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, error_code
     );
     log!(Error, "Faulting EIP: {:#x}", frame.instruction_pointer);
     log!(Error, "Faulting CS: {:#x}", frame.code_segment);
+
+    log!(
+        Error,
+        "SEGMENTS: DS={:#x} ES={:#x} FS={:#x} GS={:#x} SS={:#x}",
+        ds,
+        es,
+        fs,
+        gs,
+        ss
+    );
+    log!(Error, "REGS: ESP={:#x} CR3={:#x}", esp_reg, cr3);
 
     unsafe {
         core::arch::asm!("cli");

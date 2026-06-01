@@ -17,13 +17,13 @@ use alloc::vec::Vec;
 
 fn task_a() {
     loop {
-        unsafe { core::arch::asm!("nop") } // Aucun log pour le moment
+        log!("Task A");
     }
 }
 
 fn task_b() {
     loop {
-        unsafe { core::arch::asm!("nop") } // Aucun log pour le moment
+        log!("Task B");
     }
 }
 
@@ -35,18 +35,17 @@ pub fn protected_main() {
 
     unsafe {
         Pic::remap();
-        Pic::init_timer(); // Make sure your PIT divider is configured here!
+        Pic::init_timer();
     }
 
     unsafe { load_idt() }
-    Serial::outb(0x21, 0xFE); // Unmask IRQ0 (Timer Only). Disables keyboard to avoid conflicts for now.
+    Serial::outb(0x21, 0xFE);
 
     unsafe { init_heap() }
 
     let mut result = GraphicsHelper::new().unwrap();
     result.clear_screen();
 
-    // Register our real execution units inside the scheduler array
     {
         let mut scheduler = SCHEDULER.lock();
 
@@ -54,11 +53,11 @@ pub fn protected_main() {
         t1.id = 0;
         scheduler.add_task(t1).unwrap();
 
-        let mut t2 = create_task(task_b, 0);
+        let mut t2 = create_task(task_b, 1);
         t2.id = 1;
         scheduler.add_task(t2).unwrap();
     }
 
-    log!("Lancement du préemptif...");
-    start_scheduler(); // Jumps right into Task A, turning on interrupts during the iret phase!
+    log!("Starting scheduler...");
+    start_scheduler();
 }

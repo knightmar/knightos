@@ -21,8 +21,16 @@ lazy_static! {
 }
 
 pub fn _log(args: fmt::Arguments) {
-    use core::fmt::Write;
+    let flags: u32;
+    unsafe {
+        asm!("pushfd; pop {0}; cli", out(reg) flags, options(nostack));
+    }
+
     let _ = LOGGER.lock().write_fmt(args);
+
+    unsafe {
+        asm!("push {0}; popfd", in(reg) flags, options(nostack));
+    }
 }
 
 pub fn force_unlock() {

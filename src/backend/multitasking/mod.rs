@@ -2,7 +2,6 @@ use crate::backend::multitasking::TaskState::READY;
 use crate::log;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::arch::global_asm;
 use core::cmp::PartialEq;
 use spin::Mutex;
 
@@ -22,7 +21,6 @@ pub enum TaskState {
 
 #[repr(C, packed)]
 pub struct NewTaskFrame {
-    // Layout matching 'pusha' (pushed manually in our assembly ISR)
     edi: u32,
     esi: u32,
     ebp: u32,
@@ -31,7 +29,6 @@ pub struct NewTaskFrame {
     edx: u32,
     ecx: u32,
     eax: u32,
-    // Hardware frame (Pushed automatically by CPU on an interrupt)
     eip: u32,
     cs: u32,
     eflags: u32,
@@ -61,17 +58,14 @@ impl Scheduler {
         }
     }
 
-    /// Executed on every timer tick. Saves current stack pointer,
-    /// finds next ready task, and returns the new stack pointer.
+    /// basic round robin scheduler
     pub(crate) fn switch_next(&mut self, current_esp: u32) -> u32 {
         let current_idx = self.current_task_index;
 
-        // Save the stack pointer of the task that was just running
         if let Some(task) = &mut self.tasks[current_idx] {
             task.esp = current_esp;
         }
 
-        // Round-robin selection for the next task
         let mut next_idx = current_idx;
         for offset in 1..=self.tasks.len() {
             let idx = (current_idx + offset) % self.tasks.len();
@@ -88,17 +82,6 @@ impl Scheduler {
     }
 }
 
-// Low-level context hooks called by Assembly/Hardware
-unsafe extern "C" {
-    pub fn launch_first_task(new_esp: u32) -> !;
-    pub fn timer_interrupt_handler();
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn handle_preemptive_switch(current_esp: u32) -> u32 {
-    SCHEDULER.lock().switch_next(current_esp)
-}
-
 pub fn start_scheduler() -> ! {
     let first_esp = {
         let scheduler = SCHEDULER.lock();
@@ -109,69 +92,62 @@ pub fn start_scheduler() -> ! {
         core::arch::asm!(
         "mov esp, {0}",
         "popa",
-        "iret",
+        "iretd",
         in(reg) first_esp,
         options(noreturn)
         )
     }
 }
 
-global_asm!(
-    ".global timer_interrupt_entry",
-    "timer_interrupt_entry:",
-    "    pusha",
-
-
-    "    mov ax, 0x10",
-    "    mov ds, ax",
-    "    mov es, ax",
-    "    mov fs, ax",
-    "    mov gs, ax",
-
-    "    mov eax, esp",
-    "    push eax",
-    "    call timer_handler_inner",
-    "    add esp, 4",
-    "    mov esp, eax",
-    "    popa",
-    "    iret",
-);
-
 pub fn create_task(entry_point: fn(), id: usize) -> Task {
     let stack_size = 8192; // 8 Ko
     let mut stack = vec![0u8; stack_size];
 
     let stack_ptr = stack.as_mut_ptr() as u32;
-    let stack_bottom = (stack_ptr + stack_size as u32) & !0xF; // Alignement sur 16 octets
+    let stack_bottom = (stack_ptr + stack_size as u32) & !0xF;
     let mut esp = stack_bottom;
 
     unsafe {
-        // --- Trame IRET stricte pour le Ring 0 (3 éléments SEULEMENT) ---
-        esp -= 4; *(esp as *mut u32) = 0x202;      // EFLAGS (Interrupts activées)
-        esp -= 4; *(esp as *mut u32) = 0x08;       // CS (Kernel Code)
-        esp -= 4; *(esp as *mut u32) = entry_point as u32; // EIP
+        esp -= 4;
+        *(esp as *mut u32) = 0x202;
+        esp -= 4;
+        *(esp as *mut u32) = 0x08;
+        esp -= 4;
+        *(esp as *mut u32) = entry_point as u32;
 
-        // --- Trame POPA ---
-        esp -= 4; *(esp as *mut u32) = 0;          // EAX
-        esp -= 4; *(esp as *mut u32) = 0;          // ECX
-        esp -= 4; *(esp as *mut u32) = 0;          // EDX
-        esp -= 4; *(esp as *mut u32) = 0;          // EBX
-        esp -= 4; *(esp as *mut u32) = 0;          // ESP (ignoré par popa)
-        esp -= 4; *(esp as *mut u32) = 0;          // EBP
-        esp -= 4; *(esp as *mut u32) = 0;          // ESI
-        esp -= 4; *(esp as *mut u32) = 0;          // EDI
+        esp -= 4;
+        *(esp as *mut u32) = 0; // EAX
+        esp -= 4;
+        *(esp as *mut u32) = 0; // ECX
+        esp -= 4;
+        *(esp as *mut u32) = 0; // EDX
+        esp -= 4;
+        *(esp as *mut u32) = 0; // EBX
+        esp -= 4;
+        *(esp as *mut u32) = 0; // ESP
+        esp -= 4;
+        *(esp as *mut u32) = 0; // EBP
+        esp -= 4;
+        *(esp as *mut u32) = 0; // ESI
+        esp -= 4;
+        *(esp as *mut u32) = 0; // EDI
     }
+
+    use crate::backend::serial::LogLevel::Info;
+    log!(Info, "CREATE DEBUG: entry_point = {:#x}, prepared esp = {:#x}", entry_point as u32, esp);
 
     let current_cr3: u32;
     unsafe {
         core::arch::asm!("mov {}, cr3", out(reg) current_cr3);
     }
 
+
+
     Task {
         id: id as u32,
         esp,
         cr3: current_cr3,
-        state: TaskState::READY,
+        state: READY,
         stack,
     }
 }
