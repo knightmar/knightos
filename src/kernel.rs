@@ -2,22 +2,12 @@ use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
 use crate::backend::memory::init_heap;
 use crate::backend::multitasking::{
-    SCHEDULER, Scheduler, Task, TaskState, create_task, start_scheduler,
+    create_task, start_scheduler, SCHEDULER,
 };
 use crate::backend::paging::init_paging;
 use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
-use crate::backend::wait;
-use crate::user_interface::INPUT_SYSTEM;
-use crate::user_interface::graphic_user_interface::text::TextManager;
-use crate::user_interface::graphic_user_interface::{
-    Color, GRAPHICS_HELPER, GraphicsHelper, Point,
-};
-use crate::user_interface::utils::translate_keys;
-use crate::{log, run_test};
-use alloc::vec;
-use alloc::vec::Vec;
-use core::arch::asm;
+use crate::log;
 // include!("../resources/image_data.rs");
 
 fn graphics_input_task() {
