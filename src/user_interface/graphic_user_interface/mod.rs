@@ -7,6 +7,7 @@ use crate::utils::NotInitError;
 use crate::{BOOT_CONFIG, BootConfig, log};
 use alloc::vec;
 use alloc::vec::Vec;
+use core::cmp::max;
 use core::ops::{Add, AddAssign};
 use lazy_static::lazy_static;
 use spin::mutex::Mutex;
@@ -51,6 +52,7 @@ impl From<(u8, u8, u8)> for Color {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Color {
     r: u8,
     g: u8,
@@ -171,8 +173,37 @@ impl GraphicsHelper {
         }
     }
 
-    pub fn draw_line(&self, a: Point, b: Point) {
-        todo!("Impl draw_line")
+    pub fn draw_line(&mut self, a: Point, b: Point, color: Color) {
+        let (mut x1, mut y1) = (a.x as i32, a.y as i32);
+        let (x2, y2) = (b.x as i32, b.y as i32);
+
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+
+        let mut err = dx - dy;
+
+        loop {
+            self.draw_pixel((x1 as u32, y1 as u32).into(), color);
+
+            if x1 == x2 && y1 == y2 {
+                break;
+            }
+
+            let e2 = 2 * err;
+
+            if e2 > -dy {
+                err -= dy;
+                x1 += sx;
+            }
+
+            if e2 < dx {
+                err += dx;
+                y1 += sy;
+            }
+        }
     }
 
     pub fn clear_screen(&mut self) {

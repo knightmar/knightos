@@ -3,7 +3,7 @@ mod utils;
 use crate::backend::multitasking::{SCHEDULER};
 use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::serial::Serial;
-use crate::backend::{serial, vga};
+use crate::backend::{serial};
 use crate::user_interface::INPUT_SYSTEM;
 use crate::{log};
 use core::arch::{asm, global_asm};
@@ -64,7 +64,6 @@ pub extern "C" fn double_fault_handler_inner(_esp: u32) {
 }
 
 pub unsafe extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, error_code: u32) {
-    vga::force_unlock();
     serial::force_unlock();
 
     // Read segment registers / esp / cr3
@@ -138,7 +137,6 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     let accessed_address: usize;
     unsafe { asm!("mov {}, cr2", out(reg) accessed_address) };
 
-    vga::force_unlock();
     serial::force_unlock();
 
     // INPUT_SYSTEM.lock().vga_text.change_fg_color(Red);

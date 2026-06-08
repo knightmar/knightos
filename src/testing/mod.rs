@@ -1,7 +1,9 @@
 #[cfg(test)]
 use core::arch::asm;
+use crate::backend::serial::LogLevel::Test;
 #[cfg(test)]
 use crate::backend::wait;
+use crate::log;
 
 pub trait Testable {
     fn run(&self);
@@ -14,11 +16,11 @@ where
     fn run(&self) {
         let name = core::any::type_name::<T>();
 
-        crate::print!("Testing {} ... ", name);
+        log!(Test, "Testing {} ... ", name);
 
         self();
 
-        crate::println!("[ok]\n------------------------------");
+        log!(Test, "[ok]\n------------------------------");
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::backend::serial::LogLevel::Info;
 use crate::log;
-use crate::user_interface::graphic_user_interface::{Point, GRAPHICS_HELPER};
+use crate::user_interface::graphic_user_interface::{GRAPHICS_HELPER, Point};
 use crate::user_interface::utils::translate_keys;
 use spin::mutex::Mutex;
 
@@ -49,6 +49,7 @@ impl InputSystem {
             log!(Info, "{}", key);
             let mut guard = GRAPHICS_HELPER.lock();
             guard.print_char(key, &self.char_cursor_pos);
+            guard.draw_line((100, 200).into(), (500, 400).into(), (255, 0, 0).into());
             guard.flush();
             self.char_cursor_pos += Point::new(8, 0);
         } else {

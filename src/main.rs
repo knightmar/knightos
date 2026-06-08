@@ -10,12 +10,9 @@ extern crate alloc;
 
 use crate::backend::descriptors::gdt::GdtDescriptor;
 use crate::backend::memory::pmm::{BITMAP_PAGE, MultibootInfo};
+use crate::backend::serial::LogLevel::{Error, Info};
 
 use crate::backend::qemu_shutdown;
-#[cfg(not(test))]
-use crate::backend::serial::LogLevel::Error;
-#[cfg(not(test))]
-use crate::backend::vga;
 #[cfg(not(test))]
 use crate::backend::wait;
 #[cfg(test)]
@@ -88,11 +85,7 @@ pub fn run_test() {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    vga::force_unlock();
-
-    // TUI.lock().vga_text.change_fg_color(Red);
     log!(Error, "Erreur critique : {}", info);
-    println!("\n[ERROR] Shutting down\n{}", info);
 
     unsafe { asm!("sti") };
 
@@ -105,7 +98,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     // TUI.lock().vga_text.change_fg_color(Red);
-    println!("\n[failed]\n{}", info);
+    log!(Error, "\n[failed]\n{}", info);
     loop {
         unsafe {
             asm!("hlt");
@@ -115,11 +108,11 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[cfg(test)]
 pub fn test_runner(tests: &[&dyn Testable]) {
-    println!("Running {} tests", tests.len());
+    log!(Info, "Running {} tests", tests.len());
     for test in tests {
         test.run();
     }
-    println!("Done all tests, all succeded !");
+    log!(Info, "Done all tests, all succeded !");
     qemu_shutdown();
 }
 

@@ -10,6 +10,7 @@ pub enum LogLevel {
     Info,
     Warn,
     Error,
+    Test,
 }
 
 pub struct Serial {

@@ -11,6 +11,7 @@ macro_rules! log {
                 $crate::backend::serial::LogLevel::Info => "INFO",
                 $crate::backend::serial::LogLevel::Warn => "WARN",
                 $crate::backend::serial::LogLevel::Error => "ERROR",
+                $crate::backend::serial::LogLevel::Test => "TEST",
             },
             format_args!($fmt, $($args)*)
         ));
@@ -26,6 +27,8 @@ macro_rules! log {
                 $crate::backend::serial::LogLevel::Info => "INFO",
                 $crate::backend::serial::LogLevel::Warn => "WARN",
                 $crate::backend::serial::LogLevel::Error => "ERROR",
+                $crate::backend::serial::LogLevel::Test => "TEST",
+
             },
             $fmt
         ));
@@ -41,6 +44,7 @@ macro_rules! log {
                 $crate::backend::serial::LogLevel::Info => "INFO",
                 $crate::backend::serial::LogLevel::Warn => "WARN",
                 $crate::backend::serial::LogLevel::Error => "ERROR",
+                $crate::backend::serial::LogLevel::Test => "TEST",
             },
             $e
         ));
