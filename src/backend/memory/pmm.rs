@@ -1,12 +1,5 @@
-
-use crate::backend::paging::{PAGE_DIRECTORY, PageEntry};
-use crate::backend::serial::LogLevel::Info;
-use crate::{log, println};
-use bitfield_struct::bitfield;
-use core::alloc::{AllocError, Allocator, Layout};
-use core::arch::asm;
-use core::error::Error;
-use core::ptr::NonNull;
+use crate::backend::paging::PAGE_DIRECTORY;
+use core::alloc::AllocError;
 use spin::Mutex;
 
 #[repr(C)]
@@ -110,7 +103,7 @@ impl BitMapPages {
         if frame_index < MAX_FRAME * 32 {
             let index = frame_index / 32;
             let bit_pos = frame_index % 32;
-            self.frame_map[index] |= (1 << bit_pos);
+            self.frame_map[index] |= 1 << bit_pos;
         }
     }
 

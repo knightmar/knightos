@@ -22,10 +22,10 @@ pub fn wait(time: u32) {
 pub fn qemu_shutdown() -> ! {
     unsafe {
         // Method for modern QEMU/Bochs
-        asm!("out dx, ax", in("dx") 0x604, in("ax") 0x2000 as u16);
+        asm!("out dx, ax", in("dx") 0x604, in("ax") 0x2000u16);
 
         // Fallback for older QEMU (ISA debug exit)
-        asm!("out dx, al", in("dx") 0xf4, in("al") 0x00 as u8);
+        asm!("out dx, al", in("dx") 0xf4, in("al") 0x00u8);
     }
     
     // Fallback

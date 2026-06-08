@@ -58,7 +58,7 @@ impl Scheduler {
         }
     }
 
-    /// basic round robin scheduler
+    /// basic round-robin scheduler
     pub(crate) fn switch_next(&mut self, current_esp: u32) -> u32 {
         let current_idx = self.current_task_index;
 

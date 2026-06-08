@@ -9,9 +9,16 @@
 extern crate alloc;
 
 use crate::backend::descriptors::gdt::GdtDescriptor;
-use crate::backend::memory::pmm::{MultibootInfo, BITMAP_PAGE};
+use crate::backend::memory::pmm::{BITMAP_PAGE, MultibootInfo};
+
+use crate::backend::qemu_shutdown;
+#[cfg(not(test))]
 use crate::backend::serial::LogLevel::Error;
-use crate::backend::{qemu_shutdown, vga, wait};
+#[cfg(not(test))]
+use crate::backend::vga;
+#[cfg(not(test))]
+use crate::backend::wait;
+#[cfg(test)]
 use crate::testing::Testable;
 use core::arch::asm;
 use core::panic::PanicInfo;
@@ -39,7 +46,7 @@ pub static BOOT_CONFIG: Mutex<Option<BootConfig>> = Mutex::new(None);
 #[allow(clippy::empty_loop)]
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn kernel_main(magic: u32, mb_info_ptr: *const MultibootInfo) -> ! {
+pub unsafe extern "C" fn kernel_main(_magic: u32, mb_info_ptr: *const MultibootInfo) -> ! {
     log!("Main");
 
     unsafe {

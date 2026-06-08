@@ -1,10 +1,8 @@
 pub mod text;
 
-use crate::backend::memory::memset_u32;
 use crate::backend::memory::vmm::MemMapper;
 use crate::backend::serial::LogLevel::Info;
 use crate::user_interface::graphic_user_interface::text::TextManager;
-use crate::user_interface::{InputSystem, KeyboardNavEvent};
 use crate::utils::NotInitError;
 use crate::{BOOT_CONFIG, BootConfig, log};
 use alloc::vec;
@@ -12,7 +10,6 @@ use alloc::vec::Vec;
 use core::ops::{Add, AddAssign};
 use lazy_static::lazy_static;
 use spin::mutex::Mutex;
-
 
 lazy_static! {
     pub static ref GRAPHICS_HELPER: Mutex<GraphicsHelper> =
@@ -130,9 +127,8 @@ impl GraphicsHelper {
                 helper.boot_config.fb_height
             );
 
-            unsafe {
-                MemMapper::map_range(helper.fb_ptr as u32, fb_phys, fb_size, 3);
-            }
+            MemMapper::map_range(helper.fb_ptr as u32, fb_phys, fb_size, 3);
+
             return Ok(helper);
         }
 
@@ -175,7 +171,9 @@ impl GraphicsHelper {
         }
     }
 
-    pub fn draw_line(&self, a: Point, b: Point) {}
+    pub fn draw_line(&self, a: Point, b: Point) {
+        todo!("Impl draw_line")
+    }
 
     pub fn clear_screen(&mut self) {
         self.back_buffer.fill(0);

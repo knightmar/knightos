@@ -1,6 +1,7 @@
+#[cfg(test)]
 use core::arch::asm;
+#[cfg(test)]
 use crate::backend::wait;
-use crate::{log, println};
 
 pub trait Testable {
     fn run(&self);

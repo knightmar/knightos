@@ -1,22 +1,18 @@
-use crate::backend::serial::LogLevel::Error;
 use crate::backend::vga::colors::VGAColors;
 use crate::backend::vga::colors::VGAColors::*;
-use crate::{get_colors, log};
+use crate::get_colors;
 use core::fmt;
 use core::fmt::Write;
 
 pub(crate) mod colors;
 mod macros;
 
-pub fn force_unlock() {
-    unsafe {
-    }
-}
+pub fn force_unlock() {}
 
 unsafe impl Send for VGAText {}
 unsafe impl Sync for VGAText {}
 
-pub fn _print(args: fmt::Arguments) {
+pub fn _print(_args: fmt::Arguments) {
     // use core::fmt::Write;
     // if let Some(mut guard) = TUI.try_lock() {
     //     let _ = guard.vga_text.write_fmt(args);

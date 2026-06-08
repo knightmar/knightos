@@ -1,17 +1,14 @@
 mod utils;
 
-use crate::backend::multitasking::{SCHEDULER, Scheduler, TaskState};
+use crate::backend::multitasking::{SCHEDULER};
 use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::serial::Serial;
-use crate::backend::vga::colors::VGAColors::Red;
 use crate::backend::{serial, vga};
 use crate::user_interface::INPUT_SYSTEM;
-use crate::{log, println};
+use crate::{log};
 use core::arch::{asm, global_asm};
 use core::sync::atomic::Ordering::Relaxed;
-use core::sync::atomic::{AtomicU32, Ordering};
-use lazy_static::lazy_static;
-use spin::Mutex;
+use core::sync::atomic::{AtomicU32};
 
 pub static TICK_COUNT: AtomicU32 = AtomicU32::new(0);
 
@@ -58,7 +55,7 @@ pub unsafe extern "C" fn timer_handler_inner(current_esp: u32) -> u32 {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn double_fault_handler_inner(esp: u32) {
+pub extern "C" fn double_fault_handler_inner(_esp: u32) {
     log!(Error, "Double fault happened T-T");
 
     loop {
@@ -79,13 +76,13 @@ pub unsafe extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, err
     let esp_reg: u32;
     let cr3: u32;
     unsafe {
-        core::arch::asm!("mov {}, ds", out(reg) ds);
-        core::arch::asm!("mov {}, es", out(reg) es);
-        core::arch::asm!("mov {}, fs", out(reg) fs);
-        core::arch::asm!("mov {}, gs", out(reg) gs);
-        core::arch::asm!("mov {}, ss", out(reg) ss);
-        core::arch::asm!("mov {}, esp", out(reg) esp_reg);
-        core::arch::asm!("mov {}, cr3", out(reg) cr3);
+        asm!("mov {}, ds", out(reg) ds);
+        asm!("mov {}, es", out(reg) es);
+        asm!("mov {}, fs", out(reg) fs);
+        asm!("mov {}, gs", out(reg) gs);
+        asm!("mov {}, ss", out(reg) ss);
+        asm!("mov {}, esp", out(reg) esp_reg);
+        asm!("mov {}, cr3", out(reg) cr3);
     }
 
     log!(Error, "EXCEPTION: GENERAL PROTECTION FAULT");
@@ -110,9 +107,9 @@ pub unsafe extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, err
     log!(Error, "REGS: ESP={:#x} CR3={:#x}", esp_reg, cr3);
 
     unsafe {
-        core::arch::asm!("cli");
+        asm!("cli");
         loop {
-            core::arch::asm!("hlt");
+            asm!("hlt");
         }
     }
 }

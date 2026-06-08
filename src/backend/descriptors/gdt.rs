@@ -86,8 +86,6 @@ impl GdtDescriptor {
 
 #[allow(dead_code)]
 pub extern "C" fn post_gdt() {
-    unsafe {
-        log!("GDT loaded, segments refreshed.");
-        protected_main();
-    }
+    log!("GDT loaded, segments refreshed.");
+    protected_main();
 }

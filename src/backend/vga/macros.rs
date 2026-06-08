@@ -50,7 +50,4 @@ macro_rules! println {
     ($vga:expr) => {
         $crate::print!(@vga $vga, "\n",)
     };
-    ($fmt:expr) => {
-        $crate::print!(@global "{}\n", $fmt)
-    };
-}
+    }

@@ -1,5 +1,3 @@
-use hashbrown::HashMap;
-
 const FONT: &[u8; 4096] = include_bytes!("../../../resources/font.bin");
 const CHAR_WIDTH: usize = 8;
 const CHAR_HEIGHT: usize = 16;

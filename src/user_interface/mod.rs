@@ -1,9 +1,7 @@
 use crate::backend::serial::LogLevel::Info;
 use crate::log;
-use crate::user_interface::graphic_user_interface::{GRAPHICS_HELPER, Point};
+use crate::user_interface::graphic_user_interface::{Point, GRAPHICS_HELPER};
 use crate::user_interface::utils::translate_keys;
-use core::convert::Into;
-use core::ops::{Add, AddAssign};
 use spin::mutex::Mutex;
 
 pub mod graphic_user_interface;
