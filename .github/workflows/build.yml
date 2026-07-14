@@ -23,22 +23,14 @@ jobs:
         run: |
           cargo install cargo-binutils
 
-      - name: Install GRUB and ISO creation dependencies
+      - name: Install GRUB, ISO tools and Assembler
         run: |
           sudo apt-get update
-          sudo apt-get install -y grub-pc-bin xorriso mtools
-
-      - name: Install i686-elf Toolchain
-        run: |
-          mkdir -p $HOME/opt/cross
-          curl -Lo i686-elf-tools.tar.xz https://github.com/stivale/stivale/releases/download/v0.1.0/i686-elf-tools-linux.tar.xz
-          tar -xf i686-elf-tools.tar.xz -C $HOME/opt/cross
-          echo "$HOME/opt/cross/bin" >> $GITHUB_PATH
+          sudo apt-get install -y grub-pc-bin xorriso mtools binutils
 
       - name: Run Build Script
         run: |
           chmod +x ./build.sh
-          
           ./build.sh
 
       - name: Upload ISO Artifact
