@@ -27,6 +27,7 @@ pub fn _log(args: fmt::Arguments) {
         asm!("pushfd; pop {0}; cli", out(reg) flags);
     }
 
+    
     let _ = LOGGER.lock().write_fmt(args);
 
     unsafe {

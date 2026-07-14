@@ -1,13 +1,10 @@
-pub mod text;
-
 use crate::backend::memory::vmm::MemMapper;
 use crate::backend::serial::LogLevel::Info;
-use crate::user_interface::graphic_user_interface::text::TextManager;
+use crate::user_interface::graphics::text::TextManager;
 use crate::utils::NotInitError;
 use crate::{BOOT_CONFIG, BootConfig, log};
 use alloc::vec;
 use alloc::vec::Vec;
-use core::cmp::max;
 use core::ops::{Add, AddAssign};
 use lazy_static::lazy_static;
 use spin::mutex::Mutex;
@@ -17,10 +14,12 @@ lazy_static! {
         Mutex::new(GraphicsHelper::new().unwrap());
 }
 pub struct GraphicsHelper {
-    boot_config: BootConfig,
-    fb_ptr: *mut u8,
+    pub(crate) boot_config: BootConfig,
+    front_buffer_ptr: *mut u8,
     back_buffer: Vec<u8>,
 }
+
+//region Structs
 #[derive(Clone, Copy)]
 pub struct Point {
     pub(crate) x: u32,
@@ -104,6 +103,7 @@ impl AddAssign for Point {
         self.y += rhs.y;
     }
 }
+//endregion
 
 unsafe impl Send for GraphicsHelper {}
 unsafe impl Sync for GraphicsHelper {}
@@ -115,7 +115,7 @@ impl GraphicsHelper {
 
             let helper = GraphicsHelper {
                 boot_config: guard,
-                fb_ptr: 0x40000000 as *mut u8,
+                front_buffer_ptr: 0x40000000 as *mut u8,
                 back_buffer: vec![0u8; fb_size],
             };
 
@@ -129,7 +129,7 @@ impl GraphicsHelper {
                 helper.boot_config.fb_height
             );
 
-            MemMapper::map_range(helper.fb_ptr as u32, fb_phys, fb_size, 3);
+            MemMapper::map_range(helper.front_buffer_ptr as u32, fb_phys, fb_size, 3);
 
             return Ok(helper);
         }
@@ -137,16 +137,27 @@ impl GraphicsHelper {
         Err(NotInitError)
     }
 
-    fn get_pixel_offset(&self, x: u32, y: u32) -> u32 {
-        (y * self.boot_config.fb_pitch) + (x * (self.boot_config.fb_bpp as u32 / 8))
+    fn get_pixel_offset(&self, x: u32, y: u32) -> Option<usize> {
+        if x >= self.boot_config.fb_width || y >= self.boot_config.fb_height {
+            return None;
+        }
+
+        let pitch = self.boot_config.fb_pitch as usize;
+        let bpp = (self.boot_config.fb_bpp as usize) / 8;
+
+        let y_offset = (y as usize).checked_mul(pitch)?;
+        let x_offset = (x as usize).checked_mul(bpp)?;
+
+        y_offset.checked_add(x_offset)
     }
 
     pub fn draw_pixel(&mut self, point: Point, color: Color) {
-        let offset = self.get_pixel_offset(point.x, point.y) as usize;
-        if offset + 2 < self.back_buffer.len() {
-            self.back_buffer[offset] = color.b;
-            self.back_buffer[offset + 1] = color.g;
-            self.back_buffer[offset + 2] = color.r;
+        if let Some(offset) = self.get_pixel_offset(point.x, point.y) {
+            if offset + 2 < self.back_buffer.len() {
+                self.back_buffer[offset] = color.b;
+                self.back_buffer[offset + 1] = color.g;
+                self.back_buffer[offset + 2] = color.r;
+            }
         }
     }
 
@@ -214,7 +225,7 @@ impl GraphicsHelper {
         unsafe {
             core::ptr::copy_nonoverlapping(
                 self.back_buffer.as_ptr(),
-                self.fb_ptr,
+                self.front_buffer_ptr,
                 self.back_buffer.len(),
             );
             core::arch::asm!("mfence");
