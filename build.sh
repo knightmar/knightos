@@ -1,5 +1,5 @@
 #!/bin/bash
-export PATH=$PATH:/home/knightmar/opt/cross/bin/
+export PATH=$PATH:$HOME/opt/cross/bin/
 export PATH=$PATH:$HOME/.cargo/bin
 
 
