@@ -1,28 +1,24 @@
 use crate::backend::descriptors::idt::load_idt;
 use crate::backend::descriptors::pic::Pic;
 use crate::backend::memory::init_heap;
-use crate::backend::multitasking::{
-    create_task, start_scheduler, SCHEDULER,
-};
+use crate::backend::multitasking::{SCHEDULER, create_task, start_scheduler};
 use crate::backend::paging::init_paging;
 use crate::backend::serial::LogLevel::Info;
 use crate::backend::serial::Serial;
 use crate::log;
-// include!("../resources/image_data.rs");
+use crate::user_interface::graphics::render_task;
 
 fn graphics_input_task() {
     log!(Info, "INPUT TASK STARTING");
     loop {
-        for _ in 0..1000000 { unsafe { core::arch::asm!("nop"); } }
+        for _ in 0..1000000 {
+            unsafe {
+                core::arch::asm!("hlt");
+            }
+        }
     }
 }
 
-fn render_task() {
-    log!(Info, "RENDER TASK STARTING");
-    loop {
-        for _ in 0..1000000 { unsafe { core::arch::asm!("nop"); } }
-    }
-}
 pub fn protected_main() {
     log!("Initialisation Système...");
     unsafe { core::arch::asm!("cli") };

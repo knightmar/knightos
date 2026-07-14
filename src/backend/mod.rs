@@ -5,9 +5,9 @@ use core::sync::atomic::Ordering::Relaxed;
 pub mod descriptors;
 pub mod interrupts;
 pub mod memory;
+pub mod multitasking;
 pub mod paging;
 pub mod serial;
-pub mod multitasking;
 
 pub fn wait(time: u32) {
     unsafe {
@@ -26,7 +26,7 @@ pub fn qemu_shutdown() -> ! {
         // Fallback for older QEMU (ISA debug exit)
         asm!("out dx, al", in("dx") 0xf4, in("al") 0x00u8);
     }
-    
+
     // Fallback
     loop {
         unsafe {

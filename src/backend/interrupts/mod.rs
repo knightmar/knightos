@@ -1,14 +1,14 @@
-mod utils;
+pub mod utils;
 
-use crate::backend::multitasking::{SCHEDULER};
+use crate::backend::multitasking::SCHEDULER;
+use crate::backend::serial;
 use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::serial::Serial;
-use crate::backend::{serial};
-use crate::user_interface::INPUT_SYSTEM;
-use crate::{log};
+use crate::log;
+use crate::user_interface::input::input::INPUT_SYSTEM;
 use core::arch::{asm, global_asm};
+use core::sync::atomic::AtomicU32;
 use core::sync::atomic::Ordering::Relaxed;
-use core::sync::atomic::{AtomicU32};
 
 pub static TICK_COUNT: AtomicU32 = AtomicU32::new(0);
 
@@ -57,6 +57,10 @@ pub unsafe extern "C" fn timer_handler_inner(current_esp: u32) -> u32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn double_fault_handler_inner(_esp: u32) {
     log!(Error, "Double fault happened T-T");
+
+    unsafe {
+        asm!("int3");
+    }
 
     loop {
         unsafe { asm!("hlt") };
@@ -107,6 +111,7 @@ pub unsafe extern "x86-interrupt" fn gpf_handler(frame: InterruptStackFrame, err
 
     unsafe {
         asm!("cli");
+        asm!("int3");
         loop {
             asm!("hlt");
         }
@@ -139,11 +144,16 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
 
     serial::force_unlock();
 
+
     // INPUT_SYSTEM.lock().vga_text.change_fg_color(Red);
     //
     log!(Error, "EXCEPTION: PAGE FAULT");
     log!(Error, "Accessed Address: {:#x}", accessed_address);
     log!(Error, "Error Code: {:#b}", error_code);
+    unsafe {
+        asm!("int3");
+    }
+
     panic!("Page error occurred, check logs for more infos");
 }
 
