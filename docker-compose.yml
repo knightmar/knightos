@@ -4,7 +4,7 @@ services:
   knightos-builder:
     container_name: knightos-compiler
     build:
-      context: /root/knightos
+      context: .
       dockerfile: Dockerfile
     volumes:
       - /root/knightos:/usr/src/knightos
