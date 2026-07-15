@@ -1,9 +1,7 @@
 services:
   knightos-builder:
     image: knightos-builder:latest
+    pull_policy: build
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: knightos-builder
-    stdin_open: true
-    tty: true
