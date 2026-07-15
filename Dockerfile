@@ -1,25 +1,24 @@
-FROM rust:1.80-slim AS builder
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
     build-essential \
-    binutils \
     grub-pc-bin \
     xorriso \
     mtools \
-    curl \
-    git \
-    make \
+    binutils \
     && rm -rf /var/lib/apt/lists/*
 
-RUN rustup toolchain install nightly \
-    && rustup default nightly \
-    && rustup component add llvm-tools-preview rust-src --toolchain nightly \
-    && cargo install cargo-binutils
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN rustup component add llvm-tools-preview rust-src
+
+RUN cargo install cargo-binutils
 
 WORKDIR /usr/src/knightos
 
-COPY . .
-
-RUN make build
-
-FROM scratch AS exporter
-COPY --from=builder /usr/src/knightos/knightos.iso /
+CMD ["/bin/bash", "-c", "chmod +x ./build.sh && ./build.sh"]
