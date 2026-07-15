@@ -3,7 +3,6 @@
 [![RepoGrade](https://www.repo-grade.com/api/badge/knightmar/knightos)](https://www.repo-grade.com/report/knightmar/knightos)
 [![Build Status](https://github.com/knightmar/knightos/actions/workflows/build.yml/badge.svg)](https://github.com/knightmar/knightos/actions)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-(https://opensource.org/licenses/MIT)
 [![Rust: Nightly](https://img.shields.io/badge/Rust-Nightly-orange.svg)](https://www.rust-lang.org/)
 
 A handcrafted x86 Rust kernel.
