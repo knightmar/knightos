@@ -2,10 +2,12 @@ version: '3.8'
 
 services:
   knightos-builder:
-    container_name: knightos-compiler
+    image: knightos-builder:latest
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: knightos-builder
     volumes:
-      - /root/knightos:/usr/src/knightos
-    working_dir: /usr/src/knightos
+      - .:/workspace
+    stdin_open: true
+    tty: true

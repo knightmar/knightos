@@ -1,24 +1,42 @@
-FROM debian:bookworm-slim
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     curl \
-    ca-certificates \
     build-essential \
-    grub-pc-bin \
+    bison \
+    flex \
+    libgmp3-dev \
+    libmpc-dev \
+    libmpfr-dev \
+    texinfo \
     xorriso \
+    grub-pc-bin \
+    grub-common \
     mtools \
-    binutils \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
-ENV PATH="/root/.cargo/bin:${PATH}"
+WORKDIR /tmp
+RUN curl -O https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz && \
+    tar -xf binutils-2.42.tar.gz && \
+    mkdir binutils-build && \
+    cd binutils-build && \
+    ../binutils-2.42/configure --target=i686-elf --prefix="/usr/local" --with-sysroot --disable-nls --disable-werror && \
+    make -j$(nproc) && \
+    make install && \
+    rm -rf /tmp/*
 
-RUN rustup component add llvm-tools-preview rust-src
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
 
-RUN cargo install cargo-binutils
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-2026-07-15
 
-WORKDIR /usr/src/knightos
+RUN rustup component add rust-src llvm-tools-preview && \
+    cargo install cargo-binutils
 
-CMD ["/bin/bash", "-c", "chmod +x ./build.sh && ./build.sh"]
+WORKDIR /workspace
+
+CMD ["/bin/bash", "./build.sh"]
