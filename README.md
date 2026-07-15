@@ -1,4 +1,9 @@
 # KnightOS
+
+[![Build Status](https://github.com/knightmar/knightos/actions/workflows/build.yml/badge.svg)](https://github.com/knightmar/knightos/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Rust: Nightly](https://img.shields.io/badge/Rust-Nightly-orange.svg)](https://www.rust-lang.org/)
+
 A handcrafted x86 Rust kernel.
 
 The main goal of this project is learning, so I'm trying to write as much code as possible myself. 
