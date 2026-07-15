@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   knightos-builder:
-    image: localhost/knightos-builder:latest
+    image: knightos-builder:latest
     build:
       context: .
       dockerfile: Dockerfile
