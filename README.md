@@ -1,5 +1,6 @@
 # KnightOS
 
+[![RepoGrade](https://www.repo-grade.com/api/badge/knightmar/knightos)](https://www.repo-grade.com/report/knightmar/knightos)
 [![Build Status](https://github.com/knightmar/knightos/actions/workflows/build.yml/badge.svg)](https://github.com/knightmar/knightos/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Rust: Nightly](https://img.shields.io/badge/Rust-Nightly-orange.svg)](https://www.rust-lang.org/)
