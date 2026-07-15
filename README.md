@@ -1,88 +1,96 @@
 # KnightOS
-A x86 rust kernel written by hand.
-The main idea of the project is to learn, so I'm trying to write the most code possible myself.
-It is surely not efficient, a lot of parts might seem silly or strangely implemented, that's because I try to do the design myself and not look to much on what have been done elsewhere. 
+A handcrafted x86 Rust kernel.
+
+The main goal of this project is learning, so I'm trying to write as much code as possible myself. 
+It might not be highly optimized, and some parts may seem unusual or strangely implemented, but that's because I choose to design things myself rather than copying existing OS implementations.
 
 ## Design
-I try to split all the features in dedicated modules, and organize them in logical places. For exemple, an interrupt module, a memory module, etc.. all in the backend global module.
+I try to separate all features into dedicated modules organized logically (e.g., an `interrupts` module, a `memory` module, etc.) under the kernel core.
 
-I'll maybe do a proper mapping of the archi i'm building at some point.
+*I might create a proper architecture diagram at some point.*
 
 ## Features
-For now, here is a non exhaustive list of the features implemented:
-- [x] ASM bootloader
-- [x] basic booting
-- [x] memory module (pmm, vmm, allocator, paging)
-- [x] interrupts
-- [x] scheduler (RR for now, but will change)
-- [x] serial logging
-- [x] testsuite using cargo test
-- [x] UI at pixel level (supporting fullhd)
-- [x] text display (with custom bitmap font)
-- [x] keyboard input
-- [x] proper build system (using make)
-- [x] automated github action build
+Here is a non-exhaustive list of currently implemented features:
+- [x] Assembly bootloader & Multiboot compliance
+- [x] Basic booting sequence
+- [x] Memory management (PMM, VMM, custom allocator, paging)
+- [x] Hardware Interrupts (IDT, PIC)
+- [x] Cooperative Task Scheduler (Round Robin for now)
+- [x] Serial logging (COM1)
+- [x] Integration testsuite using `cargo test`
+- [x] Pixel-level Graphics Driver (supporting FullHD)
+- [x] Text rendering (using a custom bitmap font)
+- [x] Keyboard input handling
+- [x] Unified build system (using `make`)
+- [x] Automated CI builds via GitHub Actions
 
 ## TODO
-- [ ] Proper UI lib
-- [ ] IDLE task
-- [ ] New scheduler algo (+ better task state handling)
-- [ ] Mouse input
-- [ ] Basic shell input and commands
-- [ ] Filesystem
-- [ ] BMP Image display
+- [ ] Proper UI / Window Library
+- [ ] System IDLE task
+- [ ] Advanced scheduler algorithm (with better task state management)
+- [ ] Mouse input handling
+- [ ] Basic shell interface & commands
+- [ ] Simple File System
+- [ ] BMP Image decoding & display
+- [ ] Github action testing
 
-## How to try
-Run workflow:
-- Get an ISO file in the latest github action successfull build [here](https://github.com/knightmar/knightos/actions)
-- if you want to run it in vm, get a compatible vm that is able to run i686 (vmware, virtualbox or qemu)
-- if you want to try it on a physical computer, flash the iso on a usb drive and run it as you would do with any other iso.
+## How to Try (No Compilation Required)
+If you just want to run KnightOS without setting up a build environment:
+1. Go to the [GitHub Actions page](https://github.com/knightmar/knightos/actions) of this repository.
+2. Click on the latest successful build.
+3. Scroll down to the **Artifacts** section and download the `knightos-iso` zip file.
+4. Extract the `.iso` file.
+5. Boot it using a virtual machine (QEMU, VirtualBox, VMware) or flash it onto a USB drive to test it on real x86 hardware.
 
-## How to build
-To build the projet yourself :
+## How to Build
 
-1. Install the requirements
-### Debian / Ubuntu
-```
+If you want to compile and modify KnightOS yourself:
+
+### 1. Install System Dependencies
+
+#### Debian / Ubuntu
+```bash
 sudo apt update && sudo apt upgrade -y
-```
-```
-sudo apt install -y build-essential binutils grub-pc-bin xorriso mtools wget curl git qemu-system-x86
-```
-### Arch
-```
-sudo pacman -Syu
-```
-```
-sudo pacman -S --needed base-devel grub libisoburn mtools wget curl git qemu-desktop
+sudo apt install -y build-essential make binutils grub-pc-bin xorriso mtools wget curl git qemu-system-x86
 ```
 
-2. Install rust nightly, press 1 to go with the default install, then restart your terminal
+#### Arch Linux
+```bash
+sudo pacman -Syu
+sudo pacman -S --needed base-devel make grub libisoburn mtools wget curl git qemu-desktop
 ```
+
+### 2. Install Rust Nightly & Toolchain Components
+```bash
+# Install Rustup (press 1 to proceed with default installation, then restart your terminal)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-```
+
+# Install the Nightly toolchain and components needed for bare-metal compilation
 rustup toolchain install nightly
-```
-3. Install the rust requirements
-```
 rustup component add llvm-tools-preview rust-src --toolchain nightly
-```
-```
 cargo install cargo-binutils
 ```
-4. Clone the repo
-```
+
+### 3. Clone and Build
+```bash
+# Clone the repository
 git clone https://github.com/knightmar/knightos
-```
-5. Build the project
-```
+cd knightos
+
+# Build the bootable ISO
 make build
 ```
-6. Build done, the iso is at the root of the project, congrats !
 
+The build is complete! Your bootable image is located at the root of the project: **`knightos.iso`**. 
 
+*If you have QEMU installed, you can boot it instantly with:*
+```bash
+make run
+```
 
-
-
-
+# AI usage
+No any code has been written by AI, I've used AI only for thoses tasks:
+- Debugging (logs analyses, etc..) 
+- General architecte planning (no code)
+- Theorical explanations 
+- Github actions setup
