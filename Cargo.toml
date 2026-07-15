@@ -2,7 +2,11 @@
 name = "knightos"
 version = "0.1.0"
 edition = "2024"
-
+description = "A handcrafted, bare-metal x86 operating system kernel written in Rust"
+license = "MIT"
+repository = "https://github.com/knightmar/knightos"
+documentation = "https://github.com/knightmar/knightos#readme"
+keywords = ["os", "kernel", "x86", "bare-metal", "rust"]
 
 [profile.dev]
 # panic = "abort"
