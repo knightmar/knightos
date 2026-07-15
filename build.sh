@@ -2,7 +2,8 @@
 export PATH=$PATH:$HOME/opt/cross/bin/
 export PATH=$PATH:$HOME/.cargo/bin
 
-
+echo "PWD=$(pwd)"
+ls -la
 
 make clear
 mkdir -p build/isodir/boot/grub
