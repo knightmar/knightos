@@ -12,18 +12,21 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=/usr/local/cargo/bin:$PATH
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly-2026-07-15
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
 
-RUN rustup component add rust-src llvm-tools-preview rustfmt clippy && \
-    cargo install cargo-binutils
+RUN rustup component add rust-src llvm-tools-preview rustfmt clippy
+
+RUN cargo install cargo-binutils
 
 WORKDIR /workspace
 
 COPY . .
-RUN sed -i -e 's/\r$//' /workspace/build.sh && chmod +x /workspace/build.sh
 
-CMD ["/bin/bash", "./build.sh"]
+RUN find /workspace -name "*.sh" -exec sed -i 's/\r$//' {} \;
+RUN chmod +x /workspace/build.sh
+
+CMD ["/workspace/build.sh"]
