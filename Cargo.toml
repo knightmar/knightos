@@ -21,6 +21,9 @@ bitfield-struct = "0.12.1"
 linked_list_allocator = "0.10.5"
 hashbrown = "0.17.1"
 
+[dev-dependencies]
+pretty_assertions = "1.4.0"
+
 [[bin]]
 name = "knightos"
 path = "src/main.rs"
