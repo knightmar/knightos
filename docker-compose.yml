@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   knightos-builder:
     image: knightos-builder:latest
@@ -7,7 +5,5 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: knightos-builder
-    volumes:
-      - .:/workspace
     stdin_open: true
     tty: true
