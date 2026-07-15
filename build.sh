@@ -27,3 +27,6 @@ cargo objcopy -- -O binary "$KERNEL_ELF" build/isodir/boot/knightos.bin
 
 cp src/boot/grub.cfg build/isodir/boot/grub/grub.cfg
 grub-mkrescue -o knightos.iso build/isodir
+
+mkdir -p /output
+cp knightos.iso /output/knightos.iso
