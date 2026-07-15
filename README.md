@@ -94,6 +94,62 @@ The build is complete! Your bootable image is located at the root of the project
 make run
 ```
 
+## Building with Docker
+
+KnightOS can be built with a Docker image.
+
+### Requirements
+
+- Docker
+- Docker Compose (or the Docker Compose plugin)
+- Portainer (optional)
+
+### Build locally
+
+Clone the repository:
+
+```bash
+git clone https://github.com/knightmar/knightos.git
+cd knightos
+```
+
+Build the ISO:
+
+```bash
+docker compose up --build
+```
+
+Once the build is complete, the generated ISO will be available in:
+
+```text
+/root/knightos/output/knightos.iso
+```
+
+### Build with Portainer
+
+1. Create a new **Stack**.
+2. Select **Repository** as the build method.
+3. Repository URL:
+   ```
+   https://github.com/knightmar/knightos
+   ```
+4. Repository reference:
+   ```
+   refs/heads/master
+   ```
+5. Deploy the stack.
+
+The container will automatically:
+
+- install the complete build toolchain,
+- compile KnightOS,
+- generate `knightos.iso`,
+- copy the resulting ISO to:
+
+```text
+/root/knightos/output/knightos.iso
+```
+
 # AI usage
 No any code has been written by AI, I've used AI only for thoses tasks:
 - Debugging (logs analyses, etc..) 
