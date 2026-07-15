@@ -22,7 +22,7 @@ linked_list_allocator = "0.10.5"
 hashbrown = "0.17.1"
 
 [dev-dependencies]
-pretty_assertions = "1.4.0"
+claim = "0.5.0"
 
 [[bin]]
 name = "knightos"
