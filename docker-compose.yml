@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  knightos-builder:
+    container_name: knightos-compiler
+    build:
+      context: /root/knightos
+      dockerfile: Dockerfile
+    volumes:
+      - /root/knightos:/usr/src/knightos
+    working_dir: /usr/src/knightos
