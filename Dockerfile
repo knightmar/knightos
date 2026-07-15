@@ -23,7 +23,7 @@ RUN rustup component add rust-src llvm-tools-preview rustfmt clippy && \
 
 WORKDIR /workspace
 
-COPY build.sh /workspace/build.sh
+COPY . .
 RUN sed -i -e 's/\r$//' /workspace/build.sh && chmod +x /workspace/build.sh
 
 CMD ["/bin/bash", "./build.sh"]
