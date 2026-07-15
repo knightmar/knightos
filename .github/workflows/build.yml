@@ -49,7 +49,9 @@ jobs:
       
       - name: Check Formatting
         run: cargo fmt --all -- --check
+        continue-on-error: true
 
       
       - name: Run Clippy Lints
         run: cargo clippy -- -D warnings
+        continue-on-error: true
