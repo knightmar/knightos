@@ -97,34 +97,29 @@ make run
 
 ## Building with Docker
 
-KnightOS can be built with a Docker image.
+If you want to compile KnightOS using Docker:
 
 ### Requirements
+* **Docker** & **Docker Compose**
 
-- Docker
-- Docker Compose (or the Docker Compose plugin)
-- Portainer (optional)
+### Steps
 
-### Build locally
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/knightmar/knightos.git
+   cd knightos
+   ```
 
-Clone the repository:
+2. **Build the bootable ISO:**
+   ```bash
+   docker compose up --build
+   ```
 
-```bash
-git clone https://github.com/knightmar/knightos.git
-cd knightos
-```
-
-Build the ISO:
-
-```bash
-docker compose up --build
-```
-
-Once the build is complete, the generated ISO will be available in:
-
-```text
-/root/knightos/output/knightos.iso
-```
+3. **Retrieve your ISO:**
+   Once the build process finishes, the compiled bootable ISO will be generated automatically in the `./output/` directory of your cloned folder:
+   ```text
+   ./output/knightos.iso
+   ```
 
 # AI usage
 No any code has been written by AI, I've used AI only for thoses tasks:

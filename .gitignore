@@ -1,9 +1,9 @@
-/build/
 .idea
-
-
-# Added by cargo
-
+target/
+build/
+output/
+*.iso
+serial.log
 /target
 /knightos.iso
 /lib.rmeta
