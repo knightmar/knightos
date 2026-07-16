@@ -3,5 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      network: host
     volumes:
       - ./output:/output
