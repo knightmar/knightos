@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+target
+build
+*.iso
+*.log
+.env
+.env.example
+README.md
+CONTRIBUTING.md
+LICENCE

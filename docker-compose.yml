@@ -1,9 +1,7 @@
 services:
   knightos-builder:
-    image: knightos-builder:latest
-    pull_policy: build
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - /root/knightos/output:/output
+      - ./output:/output
