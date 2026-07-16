@@ -75,6 +75,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup toolchain install nightly
 rustup component add llvm-tools-preview rust-src --toolchain nightly
 cargo install cargo-binutils
+rustup default nightly
 ```
 
 ### 3. Clone and Build
