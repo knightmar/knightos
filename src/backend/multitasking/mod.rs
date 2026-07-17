@@ -1,4 +1,4 @@
-use crate::backend::multitasking::TaskState::READY;
+use crate::backend::multitasking::TaskState::Ready;
 use crate::log;
 use alloc::vec;
 use alloc::vec::Vec;
@@ -15,8 +15,8 @@ pub struct Task {
 
 #[derive(PartialEq)]
 pub enum TaskState {
-    READY,
-    SUSPENDED,
+    Ready,
+    Suspended,
 }
 
 #[repr(C, packed)]
@@ -69,11 +69,11 @@ impl Scheduler {
         let mut next_idx = current_idx;
         for offset in 1..=self.tasks.len() {
             let idx = (current_idx + offset) % self.tasks.len();
-            if let Some(task) = &self.tasks[idx] {
-                if task.state == READY {
-                    next_idx = idx;
-                    break;
-                }
+            if let Some(task) = &self.tasks[idx]
+                && task.state == Ready
+            {
+                next_idx = idx;
+                break;
             }
         }
 
@@ -100,7 +100,7 @@ pub fn start_scheduler() -> ! {
 }
 
 pub fn create_task(entry_point: fn(), id: usize) -> Task {
-    log!(Info, "CREATE: entry_point = {:#x}", entry_point as u32);
+    log!(Info, "CREATE: entry_point = {:#x}", entry_point as usize);
     let stack_size = 8192; // 8 Ko
     let mut stack = vec![0u8; stack_size];
 
@@ -135,20 +135,23 @@ pub fn create_task(entry_point: fn(), id: usize) -> Task {
     }
 
     use crate::backend::serial::LogLevel::Info;
-    log!(Info, "CREATE DEBUG: entry_point = {:#x}, prepared esp = {:#x}", entry_point as u32, esp);
+    log!(
+        Info,
+        "CREATE DEBUG: entry_point = {:#x}, prepared esp = {:#x}",
+        entry_point as u32,
+        esp
+    );
 
     let current_cr3: u32;
     unsafe {
         core::arch::asm!("mov {}, cr3", out(reg) current_cr3);
     }
 
-
-
     Task {
         id: id as u32,
         esp,
         cr3: current_cr3,
-        state: READY,
+        state: Ready,
         stack,
     }
 }

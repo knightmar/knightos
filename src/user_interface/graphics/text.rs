@@ -1,10 +1,7 @@
-use alloc::vec;
 use alloc::vec::Vec;
 use core::ops::Not;
 use lazy_static::lazy_static;
 use spin::Mutex;
-use crate::backend::serial::LogLevel::Info;
-use crate::log;
 
 const FONT: &[u8; 4096] = include_bytes!("../../../resources/font.bin");
 const CHAR_WIDTH: usize = 8;
@@ -27,7 +24,7 @@ impl TextManager {
 
         FONT[start_offset..start_offset + 16]
             .try_into()
-            .unwrap_or_else(|_| &[0; 16])
+            .unwrap_or(&[0; 16])
     }
 
     pub fn add_char(&mut self, char: char) {

@@ -5,7 +5,7 @@ use crate::backend::serial;
 use crate::backend::serial::LogLevel::{Error, Info};
 use crate::backend::serial::Serial;
 use crate::log;
-use crate::user_interface::input::input::INPUT_SYSTEM;
+use crate::user_interface::input::INPUT_SYSTEM;
 use core::arch::{asm, global_asm};
 use core::sync::atomic::AtomicU32;
 use core::sync::atomic::Ordering::Relaxed;
@@ -143,7 +143,6 @@ pub extern "x86-interrupt" fn page_fault_handler(_frame: InterruptStackFrame, er
     unsafe { asm!("mov {}, cr2", out(reg) accessed_address) };
 
     serial::force_unlock();
-
 
     // INPUT_SYSTEM.lock().vga_text.change_fg_color(Red);
     //

@@ -13,6 +13,18 @@ pub enum LogLevel {
     Test,
 }
 
+impl fmt::Display for LogLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            LogLevel::Info => "INFO",
+            LogLevel::Warn => "WARN",
+            LogLevel::Error => "ERROR",
+            LogLevel::Test => "TEST",
+        };
+        write!(f, "{}", s)
+    }
+}
+
 pub struct Serial {
     port: u16,
 }
@@ -27,7 +39,6 @@ pub fn _log(args: fmt::Arguments) {
         asm!("pushfd; pop {0}; cli", out(reg) flags);
     }
 
-    
     let _ = LOGGER.lock().write_fmt(args);
 
     unsafe {

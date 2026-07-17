@@ -10,7 +10,9 @@ extern crate alloc;
 
 use crate::backend::descriptors::gdt::GdtDescriptor;
 use crate::backend::memory::pmm::{BITMAP_PAGE, MultibootInfo};
-use crate::backend::serial::LogLevel::{Error, Info};
+use crate::backend::serial::LogLevel::Error;
+#[cfg(test)]
+use crate::backend::serial::LogLevel::Info;
 
 use crate::backend::qemu_shutdown;
 #[cfg(not(test))]
@@ -40,6 +42,7 @@ pub struct BootConfig {
 // This is perfectly safe and "Send" because it contains no pointers
 pub static BOOT_CONFIG: Mutex<Option<BootConfig>> = Mutex::new(None);
 
+#[allow(clippy::missing_safety_doc)]
 #[allow(clippy::empty_loop)]
 #[cfg_attr(test, allow(dead_code))]
 #[unsafe(no_mangle)]

@@ -1,9 +1,11 @@
-#[cfg(test)]
-use core::arch::asm;
 use crate::backend::serial::LogLevel::Test;
 #[cfg(test)]
 use crate::backend::wait;
 use crate::log;
+#[cfg(test)]
+use claim::assert_ok;
+#[cfg(test)]
+use core::arch::asm;
 
 pub trait Testable {
     fn run(&self);
@@ -32,8 +34,9 @@ fn breakpoint_interrupt() {
 }
 
 #[test_case]
+#[allow(clippy::eq_op)]
 fn trivial_assertion() {
-    assert_eq!(1, 1);
+    assert_ok!(Ok::<i32, i32>(0));
 }
 
 // #[test_case]

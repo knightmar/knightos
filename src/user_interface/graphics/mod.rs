@@ -4,7 +4,6 @@ use crate::log;
 use crate::user_interface::graphics::helper::{GRAPHICS_HELPER, Point};
 use crate::user_interface::graphics::text::TEXT_MANAGER;
 use core::arch::asm;
-use core::ops::Not;
 
 pub mod helper;
 pub mod text;

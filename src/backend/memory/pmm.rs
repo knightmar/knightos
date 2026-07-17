@@ -69,7 +69,8 @@ impl BitMapPages {
                 let addr = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).base_addr));
                 let len = core::ptr::read_unaligned(core::ptr::addr_of!((*map_entry).length));
 
-                if m_type == 1 { // Available RAM
+                if m_type == 1 {
+                    // Available RAM
                     let start_page = (addr / 4096) as usize;
                     let page_count = (len / 4096) as usize;
                     for page in 0..page_count {
@@ -87,7 +88,7 @@ impl BitMapPages {
             let start = &_kernel_start as *const u8 as usize;
             let end = &_kernel_end as *const u8 as usize;
 
-            for page in (start / 4096)..((end + 4095) / 4096) {
+            for page in (start / 4096)..end.div_ceil(4096) {
                 self.set_used(page);
             }
 

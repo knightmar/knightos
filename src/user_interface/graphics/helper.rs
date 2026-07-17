@@ -152,18 +152,18 @@ impl GraphicsHelper {
     }
 
     pub fn draw_pixel(&mut self, point: Point, color: Color) {
-        if let Some(offset) = self.get_pixel_offset(point.x, point.y) {
-            if offset + 2 < self.back_buffer.len() {
-                self.back_buffer[offset] = color.b;
-                self.back_buffer[offset + 1] = color.g;
-                self.back_buffer[offset + 2] = color.r;
-            }
+        if let Some(offset) = self.get_pixel_offset(point.x, point.y)
+            && offset + 2 < self.back_buffer.len()
+        {
+            self.back_buffer[offset] = color.b;
+            self.back_buffer[offset + 1] = color.g;
+            self.back_buffer[offset + 2] = color.r;
         }
     }
 
     pub fn print_char(&mut self, c: char, point: &Point) {
         let glyph = TextManager::lookup_char(c);
-        for y in 0..15 {
+        for y in 0..glyph.len() {
             for x in 0..7 {
                 let bit = (glyph[y] << x) & 0b10000000;
                 if bit != 0 {
