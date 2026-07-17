@@ -163,7 +163,7 @@ impl GraphicsHelper {
 
     pub fn print_char(&mut self, c: char, point: &Point) {
         let glyph = TextManager::lookup_char(c);
-        for y in 0..glyph.len() {
+        for y in 0..15 {
             for x in 0..7 {
                 let bit = (glyph[y] << x) & 0b10000000;
                 if bit != 0 {

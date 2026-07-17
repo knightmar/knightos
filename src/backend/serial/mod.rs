@@ -81,6 +81,8 @@ impl Serial {
 
         value
     }
+
+    #[allow(clippy::identity_op)]
     pub fn init(&mut self) -> Result<(), &'static str> {
         Self::outb(self.port + 1, 0x00);
         Self::outb(self.port + 3, 0x80);

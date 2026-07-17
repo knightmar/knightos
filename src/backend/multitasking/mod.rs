@@ -114,7 +114,7 @@ pub fn create_task(entry_point: fn(), id: usize) -> Task {
         esp -= 4;
         *(esp as *mut u32) = 0x08;
         esp -= 4;
-        *(esp as *mut u32) = entry_point as u32;
+        *(esp as *mut u32) = (entry_point as usize) as u32;
 
         esp -= 4;
         *(esp as *mut u32) = 0; // EAX
@@ -138,7 +138,7 @@ pub fn create_task(entry_point: fn(), id: usize) -> Task {
     log!(
         Info,
         "CREATE DEBUG: entry_point = {:#x}, prepared esp = {:#x}",
-        entry_point as u32,
+        entry_point as usize,
         esp
     );
 
